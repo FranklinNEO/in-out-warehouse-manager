@@ -1,0 +1,16 @@
+<component name="libraryTable">
+  <library name="dexedLibs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/locSDK1.0.1-2c203ff609524eb77b733ca53637d592.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/annotations-0d91d73e55d5fc37c8a3e8087484a7ef.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/android-support-v4-3e8b455d9a1c50a84791fe27eb01c930.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/baidumapapi-61f85962394d32ab68ddff1cc7197187.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/chardet-39d0782ecfe8d522bba9f3b98d2e28a9.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/gson-1.7.1-ee08b33f2cbf9c3d4f5604efc2f53a2f.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/core-537ebcc2eaa378c95f70d508903fc55b.jar!/" />
+      <root url="jar://$PROJECT_DIR$/bin/dexedLibs/barcodeInterface-f06056a189509a42adc01bec26f50cb7.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

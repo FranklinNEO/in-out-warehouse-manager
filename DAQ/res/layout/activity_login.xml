@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        style="@style/MMBody"
+        android:background="@drawable/login_bg"
+        android:gravity="center_horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/loading_name"
+            android:textColor="@color/white"
+            android:textSize="40sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/manager_system"
+            android:textColor="@color/white_75_transparent"
+            android:textSize="26sp" />
+
+        <LinearLayout
+            android:id="@+id/input_panel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dip"
+            android:background="@drawable/login_input"
+            android:orientation="vertical"
+            android:visibility="invisible" >
+
+            <com.redinfo.daq.ui.UserEditCancel
+                android:id="@+id/name"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
+                android:layout_marginTop="10dip" >
+            </com.redinfo.daq.ui.UserEditCancel>
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="5dp" />
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="8dip"
+                android:layout_marginRight="8dip"
+                android:background="@color/black_20_transparent" />
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="5dp" />
+
+            <com.redinfo.daq.ui.PwdEditCancel
+                android:id="@+id/pwd"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip" >
+            </com.redinfo.daq.ui.PwdEditCancel>
+        </LinearLayout>
+
+        <View style="@style/MMLabelSplit" />
+
+        <LinearLayout
+            android:id="@+id/login_panel"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible" >
+
+            <CheckBox
+                android:id="@+id/remember_user_checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="7dip"
+                android:button="@drawable/login_check"
+                android:text="@string/remember_user_info"
+                android:textColor="@color/white"
+                android:textSize="@dimen/Small_TextSize" />
+
+            <View
+                android:layout_width="0dip"
+                android:layout_height="40.0dip"
+                android:layout_weight="1.0" />
+
+            <Button
+                android:id="@+id/LoginButton"
+                style="@style/MMLineActionButton"
+                android:layout_width="90dip"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="7dip"
+                android:background="@drawable/login_button"
+                android:text="@string/login"
+                android:textColor="@color/mm_hyper_text" />
+        </LinearLayout>
+
+        <View style="@style/MMLabelSplit" />
+
+        <LinearLayout
+            android:id="@+id/splash_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:orientation="horizontal" >
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="@string/loading_now"
+                android:textColor="@color/white_75_transparent" />
+        </LinearLayout>
+
+        <View style="@style/MMLabelSplit" />
+    </LinearLayout>
+
+</LinearLayout>
