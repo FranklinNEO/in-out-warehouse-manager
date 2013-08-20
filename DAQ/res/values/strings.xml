@@ -179,5 +179,7 @@
     <string name="re_build_xml">重新生成XML文件</string>
     <string name="re_state_setting">重新编辑单据</string>
     <string name="all">全部</string>
+    <string name="delete_order">删除此单据</string>
+    <string name="delete_order_message">确定要删除此单据吗？删除后该单据所有数据将无法恢复</string>
 
 </resources>

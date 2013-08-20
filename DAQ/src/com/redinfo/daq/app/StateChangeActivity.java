@@ -1,8 +1,12 @@
 package com.redinfo.daq.app;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -114,19 +118,15 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 		switch (v.getId()) {
 		case R.id.button1:
 			File file = new File(URL, DB_FILE_NAME);
-			db = SQLiteDatabase
-					.openOrCreateDatabase(file,
-							null);
+			db = SQLiteDatabase.openOrCreateDatabase(file, null);
 			String code_sql = "SELECT * FROM orderCode_data WHERE orderID='"
 					+ order + "';";
 			Log.d("code_sql", code_sql);
-			Cursor cur_code = db.rawQuery(code_sql,
-					null);
+			Cursor cur_code = db.rawQuery(code_sql, null);
 			ArrayList<String> Code_Result = new ArrayList<String>();
 			ArrayList<String> Code_Date = new ArrayList<String>();
 			ArrayList<String> Actor_ID = new ArrayList<String>();
-			if (cur_code != null
-					&& cur_code.moveToFirst()) {
+			if (cur_code != null && cur_code.moveToFirst()) {
 				do {
 					Code_Result.add(cur_code.getString(cur_code
 							.getColumnIndex("code20")));
@@ -143,112 +143,87 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 			}
 
 			try {
-				if (Environment
-						.getExternalStorageState()
-						.equals(Environment.MEDIA_MOUNTED)) {
-						File destDir = new File(
-								Environment
-										.getExternalStorageDirectory(),
-								"/RedInfo/OrderList/");
-						if (!destDir.exists()) {
-							destDir.mkdirs();
-						}
-						File ExportFILE = new File(
-								destDir, OrderID
-										+ ".xml");// 取得sd卡的目录及要保存的文件名
-						FileOutputStream outStream = new FileOutputStream(
-								ExportFILE);
-						new WriteXML().saxToXml(
-								outStream,
-								Code_Date,
-								Code_Result,
-								Actor_ID,
-								OrderID,
-								code,
-								Func);
-						Toast.makeText(
-								StateChangeActivity.this,
-								getString(R.string.have_export_to_sd),
-								Toast.LENGTH_SHORT)
-								.show();
-						m_db.update_order(
-								"order_data",
-								orderType[Func],
-								OrderID,
-							code,
-								1,
-								createTime);
+				if (Environment.getExternalStorageState().equals(
+						Environment.MEDIA_MOUNTED)) {
+					File destDir = new File(
+							Environment.getExternalStorageDirectory(),
+							"/RedInfo/OrderList/");
+					if (!destDir.exists()) {
+						destDir.mkdirs();
+					}
+					File ExportFILE = new File(destDir, OrderID + ".xml");// 取得sd卡的目录及要保存的文件名
+					FileOutputStream outStream = new FileOutputStream(
+							ExportFILE);
+					new WriteXML().saxToXml(outStream, Code_Date, Code_Result,
+							Actor_ID, OrderID, code, Func);
+					Toast.makeText(StateChangeActivity.this,
+							getString(R.string.have_export_to_sd),
+							Toast.LENGTH_SHORT).show();
+					m_db.update_order("order_data", orderType[Func], OrderID,
+							code, 1, createTime);
 
 				} else {
-					Toast.makeText(
-							StateChangeActivity.this,
+					Toast.makeText(StateChangeActivity.this,
 							getString(R.string.sd_card_not_exist),
-							Toast.LENGTH_SHORT)
-							.show();
+							Toast.LENGTH_SHORT).show();
 				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
 
-		
-			
-			
-			
-			
-			
-			
-//			File file = new File(URL, DB_FILE_NAME);
-//			db = SQLiteDatabase.openOrCreateDatabase(file, null);
-//			String code_sql = "SELECT * FROM orderCode_data WHERE orderID='"
-//					+ order + "';";
-//			Cursor cur_code = db.rawQuery(code_sql, null);
-//			ArrayList<String> Code_Result = new ArrayList<String>();
-//			ArrayList<String> Code_Date = new ArrayList<String>();
-//			ArrayList<String> Actor_ID = new ArrayList<String>();
-//			if (cur_code != null && cur_code.moveToFirst()) {
-//				do {
-//					Code_Result.add(cur_code.getString(cur_code
-//							.getColumnIndex("code20")));
-//					Code_Date.add(cur_code.getString(cur_code
-//							.getColumnIndex("actDate")));
-//					Actor_ID.add(cur_code.getString(cur_code
-//							.getColumnIndex("actor")));
-//				} while ((cur_code.moveToNext()));
-//				cur_code.close();
-//				db.close();
-//			} else {
-//				cur_code.close();
-//				db.close();
-//			}
-//
-//			try {
-//				if (Environment.getExternalStorageState().equals(
-//						Environment.MEDIA_MOUNTED)) {
-//					File destDir = new File(
-//							Environment.getExternalStorageDirectory(),
-//							"/RedInfo/OrderList/");
-//					if (!destDir.exists()) {
-//						destDir.mkdirs();
-//					}
-//					File ExportFILE = new File(destDir, OrderID + ".xml");// 取得sd卡的目录及要保存的文件名
-//					FileOutputStream outStream = new FileOutputStream(
-//							ExportFILE);
-//					new WriteXML().saxToXml(outStream, Code_Date, Code_Result,
-//							Actor_ID, OrderID, code, Func);
-//					Toast.makeText(StateChangeActivity.this,
-//							getString(R.string.have_export_to_sd),
-//							Toast.LENGTH_SHORT).show();
-//					m_db.update_order("order_data", orderType[Func], OrderID,
-//							code, 1, createTime);
-//
-//				} else {
-//					Toast.makeText(StateChangeActivity.this,
-//							getString(R.string.sd_card_not_exist),
-//							Toast.LENGTH_SHORT).show();
-//				}
-//			} catch (FileNotFoundException e) {
-//				e.printStackTrace();
-//			}
+			// File file = new File(URL, DB_FILE_NAME);
+			// db = SQLiteDatabase.openOrCreateDatabase(file, null);
+			// String code_sql = "SELECT * FROM orderCode_data WHERE orderID='"
+			// + order + "';";
+			// Cursor cur_code = db.rawQuery(code_sql, null);
+			// ArrayList<String> Code_Result = new ArrayList<String>();
+			// ArrayList<String> Code_Date = new ArrayList<String>();
+			// ArrayList<String> Actor_ID = new ArrayList<String>();
+			// if (cur_code != null && cur_code.moveToFirst()) {
+			// do {
+			// Code_Result.add(cur_code.getString(cur_code
+			// .getColumnIndex("code20")));
+			// Code_Date.add(cur_code.getString(cur_code
+			// .getColumnIndex("actDate")));
+			// Actor_ID.add(cur_code.getString(cur_code
+			// .getColumnIndex("actor")));
+			// } while ((cur_code.moveToNext()));
+			// cur_code.close();
+			// db.close();
+			// } else {
+			// cur_code.close();
+			// db.close();
+			// }
+			//
+			// try {
+			// if (Environment.getExternalStorageState().equals(
+			// Environment.MEDIA_MOUNTED)) {
+			// File destDir = new File(
+			// Environment.getExternalStorageDirectory(),
+			// "/RedInfo/OrderList/");
+			// if (!destDir.exists()) {
+			// destDir.mkdirs();
+			// }
+			// File ExportFILE = new File(destDir, OrderID + ".xml");//
+			// 取得sd卡的目录及要保存的文件名
+			// FileOutputStream outStream = new FileOutputStream(
+			// ExportFILE);
+			// new WriteXML().saxToXml(outStream, Code_Date, Code_Result,
+			// Actor_ID, OrderID, code, Func);
+			// Toast.makeText(StateChangeActivity.this,
+			// getString(R.string.have_export_to_sd),
+			// Toast.LENGTH_SHORT).show();
+			// m_db.update_order("order_data", orderType[Func], OrderID,
+			// code, 1, createTime);
+			//
+			// } else {
+			// Toast.makeText(StateChangeActivity.this,
+			// getString(R.string.sd_card_not_exist),
+			// Toast.LENGTH_SHORT).show();
+			// }
+			// } catch (FileNotFoundException e) {
+			// e.printStackTrace();
+			// }
 			StateChangeActivity.this.finish();
 			break;
 		case R.id.button2:
@@ -268,6 +243,13 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 						Toast.LENGTH_SHORT).show();
 			} else if (confirm_et.getText().toString().trim()
 					.equals(confirm_tv.getText().toString().trim())) {
+				SimpleDateFormat df = new SimpleDateFormat(
+						"yyyy-MM-dd HH:mm:ss");
+				String logTime = df.format(new java.util.Date());
+				String logactor = ((DaqApplication) StateChangeActivity.this
+						.getApplication()).getActorId();
+
+				setLogInfo(logTime, logactor, OrderID);
 				Intent intent = new Intent();
 				Bundle bundle = new Bundle();
 				bundle.putString("order_Id", OrderID);
@@ -287,6 +269,7 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 			}
 			break;
 		case R.id.button4:
+
 			Intent intent = new Intent();
 			Bundle bundle = new Bundle();
 			bundle.putString("order_Id", OrderID);
@@ -302,4 +285,42 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 		}
 	}
 
+	private void setLogInfo(String logTime, String logactor, String orderID2) {
+		// TODO Auto-generated method stub
+		File sdCardDir = Environment.getExternalStorageDirectory();
+		File destDir = new File(sdCardDir, "/RedInfo/");
+		File logfile = new File(destDir, "log.txt");
+		FileInputStream in = null;
+		ByteArrayOutputStream outStream = null;
+		if (!logfile.exists()) {
+			try {
+				logfile.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			in = new FileInputStream(logfile);
+			outStream = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int length = -1;
+			while ((length = in.read(buffer)) != -1) {
+				outStream.write(buffer, 0, length);
+			}
+			String content = outStream.toString() + "Time:" + logTime
+					+ "---Actor:" + logactor + "---orderID:" + orderID2 + "\n";
+			FileOutputStream out = new FileOutputStream(logfile);
+			out.write(content.getBytes());
+			out.close();
+			in.close();
+			outStream.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

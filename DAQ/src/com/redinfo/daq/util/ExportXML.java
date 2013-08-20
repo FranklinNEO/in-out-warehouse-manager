@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+
 import mexxen.mx5010.barcode.BarcodeEvent;
 import mexxen.mx5010.barcode.BarcodeListener;
 import mexxen.mx5010.barcode.BarcodeManager;
@@ -38,6 +39,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -54,7 +56,7 @@ import com.redinfo.daq.data.CodeDBHelper;
 import com.redinfo.daq.ui.CustomDialog;
 
 public class ExportXML extends Activity implements OnItemClickListener,
-		OnClickListener {
+		OnClickListener, OnItemLongClickListener {
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
@@ -160,6 +162,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 		searchEdit.setInputType(InputType.TYPE_DATETIME_VARIATION_NORMAL);
 		List = (ListView) findViewById(R.id.orderDate);
 		List.setOnItemClickListener(this);
+		List.setOnItemLongClickListener(this);
 		listClickListener = new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
@@ -1608,5 +1611,57 @@ public class ExportXML extends Activity implements OnItemClickListener,
 		default:
 			break;
 		}
+	}
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View v, int position,
+			long id) {
+		// TODO Auto-generated method stub
+		pos = position;
+		Dialog dialog = null;
+		CustomDialog.Builder customBuilder = new CustomDialog.Builder(
+				ExportXML.this);
+		customBuilder
+				.setTitle(
+						getString(R.string.danjuhao)
+								+ Order.get(pos).get("oID"))
+				.setMessage(getString(R.string.delete_order_message))
+				.setNegativeButton(getString(R.string.cancel),
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								// TODO Auto-generated method stub
+								dialog.dismiss();
+							}
+						}).setPositiveButton(getString(R.string.delete_order),// 导出XML单据
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								// TODO Auto-generated method stub
+								m_db = CodeDBHelper.getInstance(ExportXML.this);
+								m_db.delete_orderCode(
+										CodeDBHelper.ORDER_CODE_TABLE_NAME,
+										Integer.parseInt(Order.get(pos).get(
+												"ocodeOrderID")));
+								m_db.delete_order(
+										CodeDBHelper.ORDER_TABLE_NAME, Order
+												.get(pos).get("oID"));
+								m_db.delete_codeStatistics(
+										CodeDBHelper.CODE_STATISTICS_TABEL_NAME,
+										Integer.parseInt(Order.get(pos).get(
+												"ocodeOrderID")));
+								Order.remove(pos);
+								dialog.dismiss();
+								adapter = new CustomAdapter(ExportXML.this);
+								List.setAdapter(adapter);
+							}
+						});
+		dialog = customBuilder.create();
+		dialog.show();
+		return false;
 	}
 }

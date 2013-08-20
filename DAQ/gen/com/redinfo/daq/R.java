@@ -431,6 +431,8 @@ public final class R {
         public static final int customer_name_abbr=0x7f0a0044;
         public static final int danjuhao=0x7f0a009b;
         public static final int delete_message=0x7f0a0037;
+        public static final int delete_order=0x7f0a00b2;
+        public static final int delete_order_message=0x7f0a00b3;
         public static final int delete_title=0x7f0a0036;
         public static final int destory_ware_house_out=0x7f0a0005;
         public static final int detail_info=0x7f0a0025;
