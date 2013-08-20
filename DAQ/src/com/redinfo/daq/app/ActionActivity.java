@@ -12,10 +12,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -45,6 +47,8 @@ public class ActionActivity extends Activity implements OnClickListener {
 	public CodeDBHelper m_db = null;
 	private Button select = null;
 	private Button next = null;
+	private TextView infoTv = null;
+	private SharedPreferences sharedpreferences;
 	private String Func;
 	private String name = "";
 	private String abbr = "";
@@ -64,20 +68,20 @@ public class ActionActivity extends Activity implements OnClickListener {
 	// getString(R.string.return_ware_house_out),
 	// getString(R.string.allocate_ware_house_out) };
 	private Integer[] FuncTxt = { R.string.produce_ware_house_in,
-			R.string.return_ware_house_in, R.string.purchase_ware_house_in,
-			R.string.allocate_ware_house_in, R.string.sales_ware_house_out,
-			R.string.destory_ware_house_out, R.string.check_ware_house_out,
-			R.string.return_ware_house_out, R.string.allocate_ware_house_out
-
-	};
+			R.string.purchase_ware_house_in, R.string.allocate_ware_house_in,
+			R.string.return_ware_house_in, R.string.sales_ware_house_out,
+			R.string.return_ware_house_out, R.string.allocate_ware_house_out,
+			R.string.check_ware_house_out, R.string.destory_ware_house_out };
 	private int flag = 100;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.action_activity);
+		sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		MyApplication.getInstance().addActivity(this);
 		m_db = CodeDBHelper.getInstance(ActionActivity.this);
+		infoTv = (TextView) findViewById(R.id.select_info_tv);
 		select = (Button) findViewById(R.id.SelectBtn);
 		select.setOnClickListener(this);
 		next = (Button) findViewById(R.id.next);
@@ -110,10 +114,69 @@ public class ActionActivity extends Activity implements OnClickListener {
 			inStream.close();
 		} catch (IOException ex) {
 		}
-		if (flag == 100) {
+		// if (flag == 100) {
+		// title.setText(getString(R.string.title_bar_name));
+		// } else {
+		// title.setText(getString(FuncTxt[flag]));
+		// }
+
+		switch (flag) {
+		case 100:
 			title.setText(getString(R.string.title_bar_name));
-		} else {
+			break;
+		case 0:
 			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.VISIBLE);
+			break;
+		case 1:
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.VISIBLE);
+			if (sharedpreferences.getBoolean("customersetting", false)) {
+				if (sharedpreferences.getString("name", null) != "") {
+					name = sharedpreferences.getString("name", null);
+					abbr = sharedpreferences.getString("abbr", null);
+					code = sharedpreferences.getString("code", "-1");
+					select.setText(sharedpreferences.getString("name", null));
+					select.setClickable(false);
+				}
+			}
+			break;
+		case 2:
+
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.VISIBLE);
+			break;
+		case 3:
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.VISIBLE);
+
+			break;
+		case 4:
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.VISIBLE);
+			break;
+		case 5:
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.VISIBLE);
+			break;
+		case 6:
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.VISIBLE);
+			break;
+		case 7:
+
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.GONE);
+			infoTv.setVisibility(View.GONE);
+			break;
+		case 8:
+
+			title.setText(getString(FuncTxt[flag]));
+			select.setVisibility(View.GONE);
+			infoTv.setVisibility(View.GONE);
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -150,13 +213,31 @@ public class ActionActivity extends Activity implements OnClickListener {
 						Toast.LENGTH_SHORT).show();
 			} else {
 				if (co.equals(coc)) {
-					SimpleDateFormat df = new SimpleDateFormat(
-							"yyyy-MM-dd   hh:mm:ss");
-					createTime = df.format(new java.util.Date());
+					if ((flag == 7) || (flag == 8)) {
+						SimpleDateFormat df = new SimpleDateFormat(
+								"yyyy-MM-dd HH:mm:ss");
+						createTime = df.format(new java.util.Date());
 
-					insertOrder(coedit.getString().trim(), flag, code,
-							createTime);
+						insertOrder(coedit.getString().trim(), flag, code,
+								createTime);
+					} else if (code != "-1") {
 
+						SimpleDateFormat df = new SimpleDateFormat(
+								"yyyy-MM-dd HH:mm:ss");
+						createTime = df.format(new java.util.Date());
+
+						insertOrder(coedit.getString().trim(), flag, code,
+								createTime);
+					} else {
+						Toast.makeText(ActionActivity.this,
+								getString(R.string.please_complete_order),
+								Toast.LENGTH_SHORT).show();
+					}
+
+				} else {
+					Toast.makeText(ActionActivity.this,
+							getString(R.string.order_different),
+							Toast.LENGTH_SHORT).show();
 				}
 			}
 			break;
@@ -187,7 +268,7 @@ public class ActionActivity extends Activity implements OnClickListener {
 			bundle.putString("customer_Name", name);
 			bundle.putString("customer_Abbr", abbr);
 			bundle.putString("customer_Code", code);
-			Log.d("code",code);
+			Log.d("code", code);
 			// bundle.putString("continueOrder", "0");
 			submmitIntent.putExtras(bundle);
 			submmitIntent.setClass(ActionActivity.this, SubmmitCode.class);
@@ -196,8 +277,8 @@ public class ActionActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	private String orderType[] = { "IA", "IB", "IC", "ID", "OA", "OE", "OF",
-			"OC", "OD" };
+	private String orderType[] = { "IA", "IC", "ID", "IB", "OA", "OB", "OD",
+			"OF", "OE" };
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -272,7 +353,7 @@ public class ActionActivity extends Activity implements OnClickListener {
 
 			} else if (resultCode == RESULT_CANCELED) {
 				Toast.makeText(this, getString(R.string.select_no_customer),
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 			}
 		}
 	}

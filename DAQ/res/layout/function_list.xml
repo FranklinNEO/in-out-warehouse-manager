@@ -23,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/mm_listitem_normal"
-        android:divider="@drawable/reader_item_divider"
+        android:divider="@color/transparent"
         android:listSelector="@drawable/mm_listitem_normal"
         android:scrollbars="none" >
     </ListView>

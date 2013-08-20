@@ -148,13 +148,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 			String vCode = ec2.getString().trim();
 			if (!Pattern.matches("^[A-Za-z0-9]+$", vCode)) {
 				Toast.makeText(this, getString(R.string.login_input_alert),
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 				break;
 			}
 
 			if (!Pattern.matches("^[A-Za-z0-9]+$", pno)) {
 				Toast.makeText(this, getString(R.string.login_input_alert),
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 				break;
 			}
 			check(pno, vCode);
@@ -208,7 +208,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 						// 验证失败提示重新登录系统
 						Toast.makeText(LoginActivity.this,
 								getString(R.string.login_failed_message),
-								Toast.LENGTH_LONG).show();
+								Toast.LENGTH_SHORT).show();
 					}
 
 				}
@@ -296,6 +296,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private void check() {
 		File sdCardDir = Environment.getExternalStorageDirectory();
 		File operatorFile = new File(sdCardDir, "/RedInfo/operator.txt");
+		File destDir = new File(sdCardDir, "/RedInfo/");
+		if (!destDir.exists()) {
+			destDir.mkdirs();
+		}
 		if (operatorFile.exists()) {
 			// Resources res = this.getResources();
 			hasFile = true;

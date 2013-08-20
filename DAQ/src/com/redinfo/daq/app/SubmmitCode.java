@@ -8,7 +8,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import mexxen.mx5010.barcode.BarcodeEvent;
 import mexxen.mx5010.barcode.BarcodeListener;
@@ -18,20 +17,23 @@ import com.redinfo.daq.R;
 import com.redinfo.daq.barcode.CaptureActivity;
 import com.redinfo.daq.data.CodeDBHelper;
 import com.redinfo.daq.ui.CustomDialog;
+import com.redinfo.daq.util.SoundPlayer;
+import com.redinfo.daq.util.SoundPlayer.State;
 import com.redinfo.daq.util.WriteXML;
 import com.redinfo.daq.xml.codeList;
 
-import android.R.integer;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,9 +56,9 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	private static final int BARCODE_INTENT_REQ_CODE = 0x965;
 
 	private static final int MENU_LOGOUT = Menu.FIRST;
-
+	private com.redinfo.daq.util.SoundPlayer sp;
 	private String name;
-	private String abbr;
+	// private String abbr;
 	private String code;
 	private String OrderID;
 	private ListView Code_List = null;
@@ -67,6 +69,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	// private ArrayList<String> SimpleBarCodeList = null;
 	// private ArrayList<integer> SimpeBarCodeNum = null;
 	private BarcodeManager bm = null;
+	private BarcodeListener bl = null;
 	private CustomAdapter adapter = null;
 	private Button Submmit = null;
 	private Button Scanner = null;
@@ -75,19 +78,18 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	private TextView orderText = null;
 	private TextView customerText = null;
 	private String createTime = null;
-	private int continueOrder = -1;
 	private int order_id;
-	private int orderCount;
-	private int favoriateFlag;
 	private int flag = 100;
-	public String orderType[] = { "IA", "IB", "IC", "ID", "OA", "OE", "OF",
-			"OC", "OD" };
+	public String orderType[] = { "IA", "IC", "ID", "IB", "OA", "OB", "OD",
+			"OF", "OE" };
+	private SharedPreferences sharedpreferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.submmit);
 		MyApplication.getInstance().addActivity(this);
+		sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		FileInputStream inStream = null;
 		ByteArrayOutputStream outStream = null;
 		try {
@@ -112,7 +114,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 
 		Bundle bundle = this.getIntent().getExtras();
 		name = bundle.getString("customer_Name");
-		abbr = bundle.getString("customer_Abbr");
+		// abbr = bundle.getString("customer_Abbr");
 		code = bundle.getString("customer_Code");
 		OrderID = bundle.getString("order_Id");
 		createTime = bundle.getString("order_createTime");
@@ -121,6 +123,9 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		BarcodeResult = new ArrayList<String>();
 		BarcodeDate = new ArrayList<String>();
 		BarcodeList = new ArrayList<codeList>();
+		sp = new SoundPlayer();
+		sp.addSound(SubmmitCode.this, R.raw.alert, State.refreshed);
+		sp.addSound(SubmmitCode.this, R.raw.refresh_pulling, State.pull);
 		Submmit = (Button) findViewById(R.id.submmit);
 		// if(continueOrder==1){
 		// }
@@ -128,18 +133,25 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		Scanner = (Button) findViewById(R.id.scan_btn);
 		Scanner.setOnClickListener(this);
 		Statistics = (Button) findViewById(R.id.Product_Statistics);
+		if (sharedpreferences.getBoolean("checkproductInfo", true)) {
+			Statistics.setEnabled(true);
+		} else {
+			Statistics.setEnabled(false);
+			Statistics.setTextColor(Color.parseColor("#60000000"));
+		}
 		Statistics.setOnClickListener(this);
 		CodeBtn = (Button) findViewById(R.id.Barcode_List);
 
 		CodeBtn.setOnClickListener(this);
 		orderText = (TextView) findViewById(R.id.orderText);
 		customerText = (TextView) findViewById(R.id.customerText);
-		orderText.setText(getString(R.string.order_id) + ":	" + OrderID);
-		customerText.setText(getString(R.string.customer) + ":	" + name);
+		orderText.setText(OrderID);
+		customerText.setText(name);
 		UpdateCodeList();
 		// 扫描器监听
 		bm = new BarcodeManager(this);
-		bm.addListener(new BarcodeListener() {
+
+		bl = new BarcodeListener() {
 			// 重写barcodeEvent 方法，获取条码事件
 			@Override
 			public void barcodeEvent(BarcodeEvent event) {
@@ -147,31 +159,52 @@ public class SubmmitCode extends Activity implements OnClickListener {
 				if (event.getOrder().equals("SCANNER_READ")) {
 					// 调用getBarcode()方法读取条码信息
 					String barcode = bm.getBarcode();
-					if (Check(barcode)) {
-						BarcodeResult.add(barcode);
-						SimpleDateFormat df = new SimpleDateFormat(
-								"yyyy-MM-dd   hh:mm:ss");
-						String CodeDate = df.format(new java.util.Date());
-						BarcodeDate.add(CodeDate);
-						adapter = new CustomAdapter(SubmmitCode.this);
-						Code_List.setAdapter(adapter);
-						// 插入条码表
-						m_db.insert_code(CodeDBHelper.ORDER_CODE_TABLE_NAME,
-								barcode, barcode.substring(0, 2), barcode
-										.substring(3, 8),
-								((DaqApplication) getApplication())
-										.getActorId(), CodeDate,
-								getproductID(barcode), getorderID());
-						UpdateCodeList();
-					} else {
+					if (barcode.length() != 20) {
+						sp.play(State.refreshed);
 						Toast.makeText(SubmmitCode.this,
-								getString(R.string.this_barcode_is_exist),
-								Toast.LENGTH_LONG).show();
+								getString(R.string.not_bcm_code),
+								Toast.LENGTH_SHORT).show();
+					} else {
+						switch (Check(barcode)) {
+						case 0:
+							BarcodeResult.add(barcode);
+							SimpleDateFormat df = new SimpleDateFormat(
+									"yyyy-MM-dd HH:mm:ss");
+							String CodeDate = df.format(new java.util.Date());
+							BarcodeDate.add(CodeDate);
+							adapter = new CustomAdapter(SubmmitCode.this);
+							Code_List.setAdapter(adapter);
+							// 插入条码表
+							m_db.insert_code(
+									CodeDBHelper.ORDER_CODE_TABLE_NAME,
+									barcode, barcode.substring(0, 2), barcode
+											.substring(3, 8),
+									((DaqApplication) getApplication())
+											.getActorId(), CodeDate,
+									getproductID(barcode), getorderID());
+							UpdateCodeList();
+							break;
+						case 1:
+							sp.play(State.refreshed);
+							Toast.makeText(SubmmitCode.this,
+									getString(R.string.this_barcode_is_exist),
+									Toast.LENGTH_SHORT).show();
+							break;
+						case 2:
+							Toast.makeText(SubmmitCode.this,
+									getString(R.string.on_data_in_database),
+									Toast.LENGTH_SHORT).show();
+							break;
+						default:
+							break;
+						}
+
 					}
 
 				}
 			}
-		});
+		};
+		bm.addListener(bl);
 	}
 
 	protected int getorderID() {
@@ -187,6 +220,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 			} while ((cur.moveToNext()));
 		}
 		cur.close();
+
 		return order_id;
 	}
 
@@ -245,24 +279,42 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	}
 
 	// 检测重复条码
-	private boolean Check(String contents) {
+	private int Check(String contents) {
 		if (this.BarcodeResult.size() != 0) {
 			for (int i = 0; i < this.BarcodeResult.size(); i++) {
 				if ((this.BarcodeResult.get(i)).equalsIgnoreCase(contents)) {
-					return false;
+					return 1;
 				}
 			}
 		}
-
+		String checksql = "SELECT * FROM products_data WHERE codeVersion='"
+				+ contents.substring(0, 2) + "' AND resCode='"
+				+ contents.substring(3, 8) + "';";
 		String sql = "SELECT * FROM orderCode_data WHERE code20='" + contents
 				+ "'AND orderID='" + getorderID() + "';";
-		Cursor cur = db.rawQuery(sql, null);
-		if (cur != null && cur.moveToFirst()) {
-			cur.close();
-			return false;
+		if (sharedpreferences.getBoolean("checkproductInfo", true)) {
+			Cursor checkcur = db.rawQuery(checksql, null);
+			if (checkcur != null && checkcur.moveToFirst()) {
+				Cursor cur = db.rawQuery(sql, null);
+				if (cur != null && cur.moveToFirst()) {
+					cur.close();
+					return 1;
+				} else {
+					cur.close();
+					return 0;
+				}
+			} else {
+				return 2;
+			}
 		} else {
-			cur.close();
-			return true;
+			Cursor cur = db.rawQuery(sql, null);
+			if (cur != null && cur.moveToFirst()) {
+				cur.close();
+				return 1;
+			} else {
+				cur.close();
+				return 0;
+			}
 		}
 
 	}
@@ -270,6 +322,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	public final class ViewHolder {
 		public TextView Barcodetv;
 		public TextView BarcodeNum;
+		public TextView BarcodeNo;
 	}
 
 	// 自定义条码数据容纳器
@@ -305,16 +358,18 @@ public class SubmmitCode extends Activity implements OnClickListener {
 						.findViewById(R.id.reBarcode);
 				holder.BarcodeNum = (TextView) convertView
 						.findViewById(R.id.code_num);
+				holder.BarcodeNo = (TextView) convertView
+						.findViewById(R.id.code_no);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
-
+			holder.BarcodeNo.setText((position + 1) + "");
 			holder.Barcodetv.setText(BarcodeList.get(position).getcodeVersion()
 					+ "," + BarcodeList.get(position).getresCode());
 			if (BarcodeList.get(position).getnum() < 10) {
-				holder.BarcodeNum.setText("0"
-						+ BarcodeList.get(position).getnum() + "");
+				holder.BarcodeNum.setText(" "
+						+ BarcodeList.get(position).getnum() + " ");
 			} else {
 				holder.BarcodeNum.setText(BarcodeList.get(position).getnum()
 						+ "");
@@ -350,6 +405,8 @@ public class SubmmitCode extends Activity implements OnClickListener {
 				codebundle.putString("customer", name);
 				codeIntent.putExtras(codebundle);
 				codeIntent.setClass(SubmmitCode.this, CoderListActivity.class);
+				bm.removeListener(bl);
+				bm.dismiss();
 				startActivity(codeIntent);
 				this.finish();
 			} else {
@@ -377,7 +434,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		if (BarcodeList.size() == 0) {
 			Toast.makeText(SubmmitCode.this,
 					getString(R.string.please_complete_order),
-					Toast.LENGTH_LONG).show();
+					Toast.LENGTH_SHORT).show();
 		} else {
 
 			// 查询客户被选择的次数
@@ -386,6 +443,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 					SubmmitCode.this);
 			customBuilder
 					.setTitle(getString(R.string.submmit_success))
+					.setMessage(getString(R.string.message1))
 					.setNegativeButton(getString(R.string.exit_the_order),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
@@ -395,6 +453,8 @@ public class SubmmitCode extends Activity implements OnClickListener {
 									// intent.setClass(SubmmitCode.this,
 									// Function.class);
 									// startActivity(intent);
+									bm.removeListener(bl);
+									bm.dismiss();
 									SubmmitCode.this.finish();
 									// MyApplication.getInstance().exit();
 									db.close();
@@ -410,6 +470,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 											null);
 									ArrayList<String> Code_Result = new ArrayList<String>();
 									ArrayList<String> Code_Date = new ArrayList<String>();
+									ArrayList<String> Actor_ID = new ArrayList<String>();
 									if (cur_code != null
 											&& cur_code.moveToFirst()) {
 										do {
@@ -417,7 +478,8 @@ public class SubmmitCode extends Activity implements OnClickListener {
 													.getColumnIndex("code20")));
 											Code_Date.add(cur_code.getString(cur_code
 													.getColumnIndex("actDate")));
-
+											Actor_ID.add(cur_code.getString(cur_code
+													.getColumnIndex("actor")));
 										} while ((cur_code.moveToNext()));
 										cur_code.close();
 									} else {
@@ -434,7 +496,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 												Toast.makeText(
 														SubmmitCode.this,
 														getString(R.string.please_complete_order),
-														Toast.LENGTH_LONG)
+														Toast.LENGTH_SHORT)
 														.show();
 											} else {
 												File destDir = new File(
@@ -449,20 +511,14 @@ public class SubmmitCode extends Activity implements OnClickListener {
 														OrderID + ".xml");// 取得sd卡的目录及要保存的文件名
 												FileOutputStream outStream = new FileOutputStream(
 														file);
-												new WriteXML()
-														.saxToXml(
-																outStream,
-																Code_Date,
-																Code_Result,
-																((DaqApplication) SubmmitCode.this
-																		.getApplication())
-																		.getActorId(),
-																OrderID, code,
-																flag);
+												new WriteXML().saxToXml(
+														outStream, Code_Date,
+														Code_Result, Actor_ID,
+														OrderID, code, flag);
 												Toast.makeText(
 														SubmmitCode.this,
 														getString(R.string.have_export_to_sd),
-														Toast.LENGTH_LONG)
+														Toast.LENGTH_SHORT)
 														.show();
 												m_db.update_order("order_data",
 														orderType[flag],
@@ -474,6 +530,8 @@ public class SubmmitCode extends Activity implements OnClickListener {
 														SubmmitCode.this,
 														ActionActivity.class);
 												startActivity(intent);
+												bm.removeListener(bl);
+												bm.dismiss();
 												SubmmitCode.this.finish();
 												db.close();
 											}
@@ -482,7 +540,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 											Toast.makeText(
 													SubmmitCode.this,
 													getString(R.string.sd_card_not_exist),
-													Toast.LENGTH_LONG).show();
+													Toast.LENGTH_SHORT).show();
 										}
 									} catch (FileNotFoundException e) {
 										e.printStackTrace();
@@ -510,7 +568,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, MENU_LOGOUT, 0, "注销帐号");
+		menu.add(0, MENU_LOGOUT, 0, getString(R.string.logout_message));
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -522,22 +580,37 @@ public class SubmmitCode extends Activity implements OnClickListener {
 				SubmmitCode.this);
 		customBuilder
 				.setTitle(getString(R.string.alert))
-				.setMessage(getString(R.string.alert_order_message))
+				.setMessage(
+						getString(R.string.alert_order_message) + " "
+								+ getString(R.string.exit_clean))
 				.setNegativeButton(getString(R.string.confirm_to_exit),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
 								dialog.dismiss();
-								// deleteCode();
-								// Intent intent = new Intent();
-								// intent.setClass(SubmmitCode.this,
-								// Function.class);
-								// startActivity(intent);
-								SubmmitCode.this.finish();
-								db.close();
+								if (BarcodeList.size() == 0) {
+									m_db.delete_order(
+											CodeDBHelper.ORDER_TABLE_NAME,
+											OrderID);
+									bm.removeListener(bl);
+									bm.dismiss();
+									SubmmitCode.this.finish();
+									db.close();
+								} else {
+									// deleteCode();
+									// Intent intent = new Intent();
+									// intent.setClass(SubmmitCode.this,
+									// Function.class);
+									// startActivity(intent);
+									bm.removeListener(bl);
+									bm.dismiss();
+									SubmmitCode.this.finish();
+									db.close();
+								}
+
 							}
 						})
-				.setPositiveButton(getString(R.string.return_to_order),// 导出XML单据
+				.setPositiveButton(getString(R.string.return_to_order),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
@@ -587,6 +660,9 @@ public class SubmmitCode extends Activity implements OnClickListener {
 											LoginActivity.class);
 									intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 									startActivity(intent);
+									bm.removeListener(bl);
+									bm.dismiss();
+
 									SubmmitCode.this.finish();
 									db.close();
 									dialog.dismiss();
@@ -613,10 +689,13 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		if (requestCode == BARCODE_INTENT_REQ_CODE) {
 			if (resultCode == RESULT_OK) {
 				String contents = intent.getStringExtra("SCAN_RESULT");
-				if (Check(contents)) {
+
+				switch (Check(contents)) {
+				case 0:
+
 					this.BarcodeResult.add(contents);
 					SimpleDateFormat df = new SimpleDateFormat(
-							"yyyy-MM-dd   hh:mm:ss");
+							"yyyy-MM-dd   HH:mm:ss");
 					String CodeDate = df.format(new java.util.Date());
 					this.BarcodeDate.add(CodeDate);
 					m_db.insert_code(CodeDBHelper.ORDER_CODE_TABLE_NAME,
@@ -625,14 +704,24 @@ public class SubmmitCode extends Activity implements OnClickListener {
 							((DaqApplication) getApplication()).getActorId(),
 							CodeDate, getproductID(contents), getorderID());
 					UpdateCodeList();
-				} else {
+
+					break;
+				case 1:
 					Toast.makeText(this,
 							getString(R.string.this_barcode_is_exist),
-							Toast.LENGTH_LONG).show();
+							Toast.LENGTH_SHORT).show();
+					break;
+				case 2:
+					Toast.makeText(SubmmitCode.this,
+							getString(R.string.on_data_in_database),
+							Toast.LENGTH_SHORT).show();
+					break;
+				default:
+					break;
 				}
 			} else if (resultCode == RESULT_CANCELED) {
 				Toast.makeText(this, getString(R.string.not_find_barcode),
-						Toast.LENGTH_LONG).show();
+						Toast.LENGTH_SHORT).show();
 			}
 		}
 	}

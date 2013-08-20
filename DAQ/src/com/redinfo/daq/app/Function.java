@@ -32,12 +32,15 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -62,10 +65,10 @@ public class Function extends Activity implements OnItemClickListener,
 	public SQLiteDatabase db;
 	public Dialog loadingdialog = null;
 	private Button funcBtn = null;
-	private static final int FUNCTION_INTENT_REQ_CODE = 0x967;
+	// private static final int FUNCTION_INTENT_REQ_CODE = 0x967;
 	private static final int MENU_LOGOUT = Menu.FIRST;
 	private Integer[] mThumbIds = { R.drawable.shipping, R.drawable.order,
-			R.drawable.maintenance };
+			R.drawable.maintenance, R.drawable.system_info };
 	private String Func;
 	// private String[] GridItem = {
 	// this.getResources().getString(R.string.ware_house_type),
@@ -82,12 +85,13 @@ public class Function extends Activity implements OnItemClickListener,
 	// this.getResources().getString(R.string.return_ware_house_out),
 	// this.getResources().getString(R.string.allocate_ware_house_out) };
 	private Integer[] GridItem = { R.string.ware_house_type,
-			R.string.order_manager, R.string.sys_setting };
+			R.string.order_manager, R.string.sys_setting,
+			R.string.sys_infomation };
 	private Integer[] FuncTxt = { R.string.produce_ware_house_in,
-			R.string.return_ware_house_in, R.string.purchase_ware_house_in,
-			R.string.allocate_ware_house_in, R.string.sales_ware_house_out,
-			R.string.destory_ware_house_out, R.string.check_ware_house_out,
-			R.string.return_ware_house_out, R.string.allocate_ware_house_out
+			R.string.purchase_ware_house_in, R.string.allocate_ware_house_in,
+			R.string.return_ware_house_in, R.string.sales_ware_house_out,
+			R.string.return_ware_house_out, R.string.allocate_ware_house_out,
+			R.string.check_ware_house_out, R.string.destory_ware_house_out
 
 	};
 	private File customerFile = null;
@@ -95,13 +99,16 @@ public class Function extends Activity implements OnItemClickListener,
 	private static boolean hasproduct = false;
 	private static boolean hascustomer = false;
 	private int flag = 100;
-
+	private SharedPreferences sharedpreferences;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.function);
 		MyApplication.getInstance().addActivity(this);
+		sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		GridView gridView = (GridView) findViewById(R.id.gridView);
+		// gridView.setSelector(new ColorDrawable(Color.TRANSPARENT));
+		gridView.setSelector(R.drawable.ball_bg);
 		gridView.setAdapter(new ImageAdapter(this));
 		gridView.setOnItemClickListener(this);
 		funcBtn = (Button) findViewById(R.id.function);
@@ -109,34 +116,34 @@ public class Function extends Activity implements OnItemClickListener,
 		loadingdialog = new Dialog(Function.this, R.style.mmdialog);
 		loadingdialog.setContentView(R.layout.loading_dialog);
 		// 验证功能选项
-		FileInputStream inStream = null;
-		ByteArrayOutputStream outStream = null;
-		try {
-			inStream = this.openFileInput("funcInfo.txt");
-			outStream = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int length = -1;
-			while ((length = inStream.read(buffer)) != -1) {
-				outStream.write(buffer, 0, length);
-			}
-			String content = outStream.toString();
-			if (content != null) {
-				Func = content.trim();
-				flag = Integer.parseInt(Func);
-			}
-			outStream.close();
-			inStream.close();
-		} catch (IOException ex) {
-		}
-		if (flag == 100) {
-			funcBtn.setText(getString(R.string.title_bar_name));
-			Toast.makeText(Function.this,
-					getString(R.string.please_select_ware_house_type),
-					Toast.LENGTH_SHORT).show();
-			funcBtn.setEnabled(false);
-		} else {
-			funcBtn.setText(getString(FuncTxt[flag]));
-		}
+		// FileInputStream inStream = null;
+		// ByteArrayOutputStream outStream = null;
+		// try {
+		// inStream = this.openFileInput("funcInfo.txt");
+		// outStream = new ByteArrayOutputStream();
+		// byte[] buffer = new byte[1024];
+		// int length = -1;
+		// while ((length = inStream.read(buffer)) != -1) {
+		// outStream.write(buffer, 0, length);
+		// }
+		// String content = outStream.toString();
+		// if (content != null) {
+		// Func = content.trim();
+		// flag = Integer.parseInt(Func);
+		// }
+		// outStream.close();
+		// inStream.close();
+		// } catch (IOException ex) {
+		// }
+		// if (flag == 100) {
+		// funcBtn.setText(getString(R.string.title_bar_name));
+		// Toast.makeText(Function.this,
+		// getString(R.string.please_select_ware_house_type),
+		// Toast.LENGTH_SHORT).show();
+		// funcBtn.setEnabled(false);
+		// } else {
+		// funcBtn.setText(getString(FuncTxt[flag]));
+		// }
 		new AsyncTask<Integer, Integer, String[]>() {
 
 			protected void onPreExecute() {
@@ -155,26 +162,49 @@ public class Function extends Activity implements OnItemClickListener,
 			}
 
 			protected void onPostExecute(String[] result) {
-				if (!hasproduct) {
-					Toast.makeText(Function.this,
-							getString(R.string.please_import_product_file),
-							Toast.LENGTH_SHORT).show();
-				}
-				if (!hascustomer) {
-					Toast.makeText(Function.this,
-							getString(R.string.please_import_customer_file),
-							Toast.LENGTH_SHORT).show();
-				}
-				if (hascustomer && hasproduct) {
-					funcBtn.setEnabled(true);
+				if (sharedpreferences.getBoolean("checkproductInfo", true)) {
+					if (!hasproduct) {
+						Toast.makeText(Function.this,
+								getString(R.string.please_import_product_file),
+								Toast.LENGTH_SHORT).show();
+					}
+					if (!hascustomer) {
+						Toast.makeText(
+								Function.this,
+								getString(R.string.please_import_customer_file),
+								Toast.LENGTH_SHORT).show();
+					}
+					if (hascustomer && hasproduct) {
+						funcBtn.setEnabled(true);
+						funcBtn.setTextColor(Color.parseColor("#ffffffff"));
+						funcBtn.setBackgroundResource(R.drawable.start_button);
+					} else {
+						funcBtn.setEnabled(false);
+						funcBtn.setTextColor(Color.parseColor("#60000000"));
+						funcBtn.setBackgroundResource(R.drawable.login_button);
+					}
+
 				} else {
-					funcBtn.setEnabled(false);
+					if (!hascustomer) {
+						Toast.makeText(
+								Function.this,
+								getString(R.string.please_import_customer_file),
+								Toast.LENGTH_SHORT).show();
+					}
+					if (hascustomer) {
+						funcBtn.setEnabled(true);
+						funcBtn.setTextColor(Color.parseColor("#ffffffff"));
+						funcBtn.setBackgroundResource(R.drawable.start_button);
+					} else {
+						funcBtn.setEnabled(false);
+						funcBtn.setTextColor(Color.parseColor("#60000000"));
+						funcBtn.setBackgroundResource(R.drawable.login_button);
+					}
 				}
 				loadingdialog.dismiss();
 				super.onPostExecute(result);
 			}
 		}.execute(0);
-
 	}
 
 	protected void CheckFile() {
@@ -185,18 +215,20 @@ public class Function extends Activity implements OnItemClickListener,
 		File sdCardDir = Environment.getExternalStorageDirectory();
 		productFile = new File(sdCardDir, "/RedInfo/products.xml");
 		customerFile = new File(sdCardDir, "/RedInfo/Customers.txt");
-		if (productFile.exists()) {
-			loadproduct();
-			hasproduct = true;
-			MoveProductFile();
-			productFile.delete();
-		} else {
-			// if (!checkproduct()) {
-			// hasproduct = false;
-			// } else {
-			// hasproduct = true;
-			// }
-			hasproduct = checkproduct();
+		if (sharedpreferences.getBoolean("checkproductInfo", true)) {
+			if (productFile.exists()) {
+				loadproduct();
+				hasproduct = true;
+				MoveProductFile();
+				productFile.delete();
+			} else {
+				// if (!checkproduct()) {
+				// hasproduct = false;
+				// } else {
+				// hasproduct = true;
+				// }
+				hasproduct = checkproduct();
+			}
 		}
 
 		if (customerFile.exists()) {
@@ -552,6 +584,12 @@ public class Function extends Activity implements OnItemClickListener,
 
 	}
 
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+	}
+
 	// 载入客户信息
 	private void loadcustomer() {
 		if (checkcustomer()) {
@@ -714,7 +752,8 @@ public class Function extends Activity implements OnItemClickListener,
 		case 0:
 			Intent intent = new Intent();
 			intent.setClass(Function.this, FunctionList.class);
-			startActivityForResult(intent, FUNCTION_INTENT_REQ_CODE);
+			// startActivityForResult(intent, FUNCTION_INTENT_REQ_CODE);
+			startActivity(intent);
 			break;
 		case 1:
 			Intent intent1 = new Intent();
@@ -723,8 +762,11 @@ public class Function extends Activity implements OnItemClickListener,
 			break;
 		case 2:
 			Intent intent2 = new Intent();
-			intent2.setClass(Function.this, SystemSetting.class);
+			intent2.setClass(Function.this, ConfirmActivity.class);
 			startActivity(intent2);
+			// Intent intent2 = new Intent();
+			// intent2.setClass(Function.this, SystemSetting.class);
+			// startActivity(intent2);
 			// new AsyncTask<Integer, Integer, String[]>() {
 			//
 			// protected void onPreExecute() {
@@ -764,90 +806,198 @@ public class Function extends Activity implements OnItemClickListener,
 			// }
 			// }.execute(0);
 			break;
+		case 3:
+			Intent infoIntent = new Intent();
+			infoIntent.setClass(Function.this, SystemInfo.class);
+			startActivity(infoIntent);
+			break;
 		default:
 			break;
 		}
 	}
 
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent intent) {
-		if (requestCode == FUNCTION_INTENT_REQ_CODE) {
-			flag = intent.getIntExtra("POS", flag);
-			if (resultCode == RESULT_OK) {
-				funcBtn.setText(getString(FuncTxt[flag]));
-				saveFuncInfo(flag);
-				if (hasproduct && hascustomer)
-					funcBtn.setEnabled(true);
-			} else if (resultCode == RESULT_CANCELED) {
-				Toast.makeText(this,
-						getString(R.string.please_select_func_need),
-						Toast.LENGTH_LONG).show();
-			}
-		}
-	}
-
-	/**
-	 * 保存记录的功能选项
-	 * 
-	 * @param function
-	 */
-	private void saveFuncInfo(int function) {
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		FileInputStream inStream = null;
+		ByteArrayOutputStream outStream = null;
 		try {
-			FileOutputStream outStream = this.openFileOutput("funcInfo.txt",
-					Context.MODE_PRIVATE);
-			String content = function + "";
-			outStream.write(content.getBytes());
+			inStream = this.openFileInput("funcInfo.txt");
+			outStream = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int length = -1;
+			while ((length = inStream.read(buffer)) != -1) {
+				outStream.write(buffer, 0, length);
+			}
+			String content = outStream.toString();
+			if (content != null) {
+				Func = content.trim();
+				flag = Integer.parseInt(Func);
+			}
 			outStream.close();
+			inStream.close();
 		} catch (IOException ex) {
-
+		}
+		if (flag == 100) {
+			funcBtn.setText(getString(R.string.title_bar_name));
+			Toast.makeText(Function.this,
+					getString(R.string.please_select_ware_house_type),
+					Toast.LENGTH_SHORT).show();
+			funcBtn.setEnabled(false);
+			funcBtn.setTextColor(Color.parseColor("#60000000"));
+			funcBtn.setBackgroundResource(R.drawable.login_button);
+		} else {
+			funcBtn.setText(getString(FuncTxt[flag]));
+			funcBtn.setEnabled(true);
+			funcBtn.setTextColor(Color.parseColor("#ffffffff"));
+			funcBtn.setBackgroundResource(R.drawable.start_button);
 		}
 	}
+
+	// @Override
+	// protected void onActivityResult(int requestCode, int resultCode,
+	// Intent intent) {
+	// if (requestCode == FUNCTION_INTENT_REQ_CODE) {
+	// flag = intent.getIntExtra("POS", flag);
+	// if (resultCode == RESULT_OK) {
+	// funcBtn.setText(getString(FuncTxt[flag]));
+	// saveFuncInfo(flag);
+	// if (hasproduct && hascustomer)
+	// funcBtn.setEnabled(true);
+	// } else if (resultCode == RESULT_CANCELED) {
+	// Toast.makeText(this,
+	// getString(R.string.please_select_func_need),
+	// Toast.LENGTH_SHORT).show();
+	// }
+	// }
+	// }
+
+	// /**
+	// * 保存记录的功能选项
+	// *
+	// * @param function
+	// */
+	// private void saveFuncInfo(int function) {
+	// try {
+	// FileOutputStream outStream = this.openFileOutput("funcInfo.txt",
+	// Context.MODE_PRIVATE);
+	// String content = function + "";
+	// outStream.write(content.getBytes());
+	// outStream.close();
+	// } catch (IOException ex) {
+	//
+	// }
+	// }
 
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		Intent SWHO = new Intent();
+		SharedPreferences sharedpreferences = PreferenceManager
+				.getDefaultSharedPreferences(this);
 		switch (v.getId()) {
 		case R.id.function:
 			switch (flag) {
 			case 100:
 				break;
 			case 0:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+				if (sharedpreferences.getBoolean("ProduceWareHouseIn", false)) {
+
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
 				break;
 			case 1:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+				if (sharedpreferences.getBoolean("PurchaseWareHouseIn", false)) {
+
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
 				break;
 			case 2:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+
+				if (sharedpreferences.getBoolean("AllocateWareHouseIn", false)) {
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
+
 				break;
 			case 3:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+
+				if (sharedpreferences.getBoolean("ReturnWareHouseIn", false)) {
+
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
 				break;
 			case 4:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+				if (sharedpreferences.getBoolean("SalesWareHouseOut", false)) {
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
 				break;
 			case 5:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+				if (sharedpreferences.getBoolean("ReturnWareHouseOut", false)) {
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
+
 				break;
 			case 6:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+				if (sharedpreferences.getBoolean("AllocateWareHouseOut", false)) {
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
+
 				break;
 			case 7:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+				if (sharedpreferences.getBoolean("CheckWareHouseOut", false)) {
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
 				break;
 			case 8:
-				SWHO.setClass(Function.this, ActionActivity.class);
-				startActivity(SWHO);
+				if (sharedpreferences.getBoolean("DestoryWareHouseOut", false)) {
+					SWHO.setClass(Function.this, ActionActivity.class);
+					startActivity(SWHO);
+				} else {
+					Toast.makeText(Function.this,
+							getString(R.string.open_this_function),
+							Toast.LENGTH_SHORT).show();
+				}
 				break;
 
 			default:
@@ -858,5 +1008,4 @@ public class Function extends Activity implements OnItemClickListener,
 			break;
 		}
 	}
-
 }

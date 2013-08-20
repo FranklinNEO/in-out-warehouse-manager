@@ -7,16 +7,24 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="38dip"
-        android:gravity="left|center_vertical"
+        android:layout_height="fill_parent"
         android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/code_no"
+            android:layout_width="48dip"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_blank"
+            android:gravity="center"
+            android:text="9999"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/reBarcode"
             android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5.0dip"
             android:layout_weight="1"
+            android:background="@drawable/white_blank"
             android:gravity="center"
             android:text="TextView"
             android:textSize="20sp" />
@@ -24,12 +32,10 @@
         <TextView
             android:id="@+id/code_num"
             android:layout_width="wrap_content"
-            android:layout_height="30dip"
-            android:background="@drawable/code_bg"
-            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_blank"
+            android:gravity="center|right"
             android:text="99"
-            android:layout_marginRight="20dip"
-            android:textColor="@color/white"
             android:textSize="20sp" />
     </LinearLayout>
 

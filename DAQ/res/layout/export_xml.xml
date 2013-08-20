@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/export_layout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="#f3f3f3"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -17,12 +17,62 @@
             android:layout_gravity="center"
             android:paddingLeft="8dip"
             android:text="@string/order_manager" />
+
+        <Button
+            android:id="@+id/sub_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/title_func"
+            android:paddingLeft="20dip"
+            android:paddingRight="20dip"
+            android:text="全部"
+            android:textColor="@color/white" >
+        </Button>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/panel_bg"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/search_bar_et"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="3.0dip"
+            android:layout_marginTop="3.0dip"
+            android:layout_weight="1"
+            android:background="@drawable/search_bar_edit_bg"
+            android:ems="10"
+            android:hint="请输入要搜索的单号"
+            android:singleLine="true"
+            android:textSize="13sp" >
+        </EditText>
+
+        <Button
+            android:id="@+id/order_search"
+            android:layout_width="50dp"
+            android:layout_height="45dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="3.0dip"
+            android:layout_marginRight="3.0dip"
+            android:layout_marginTop="1.0dip"
+            android:background="@drawable/message_send_disable"
+            android:text="@string/search"
+            android:textColor="@color/mm_hyper_text" />
     </LinearLayout>
 
     <ListView
         android:id="@+id/orderDate"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="@drawable/mm_listitem_normal"
+        android:divider="@drawable/reader_item_divider"
+        android:listSelector="@drawable/mm_listitem_normal"
+        android:scrollbars="none" >
     </ListView>
 
 </LinearLayout>

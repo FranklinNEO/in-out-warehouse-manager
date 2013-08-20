@@ -3,6 +3,9 @@ package com.redinfo.daq.app;
 import java.io.File;
 import java.util.ArrayList;
 
+import mexxen.mx5010.barcode.BarcodeEvent;
+import mexxen.mx5010.barcode.BarcodeListener;
+import mexxen.mx5010.barcode.BarcodeManager;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -51,6 +54,9 @@ public class CoderListActivity extends Activity implements
 	String customerName = null;
 	String customerInitial = null;
 	private boolean exsit = true;
+	private BarcodeManager bm = null;
+	private BarcodeListener bl = null;
+	private String barcode = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +74,8 @@ public class CoderListActivity extends Activity implements
 		codeListView = (ListView) findViewById(R.id.codelv);
 		codeListView.setOnItemLongClickListener(this);
 		search_et = (EditText) findViewById(R.id.search_bar_et);
-		search_et.setInputType(InputType.TYPE_CLASS_NUMBER);
-		// search_et.setInputType(InputType.TYPE_DATETIME_VARIATION_NORMAL);
+		// search_et.setInputType(InputType.TYPE_CLASS_NUMBER);
+		search_et.setInputType(InputType.TYPE_DATETIME_VARIATION_NORMAL);
 		code_searchBtn = (Button) findViewById(R.id.code_search);
 		code_searchBtn.setOnClickListener(this);
 		loadingdialog = new Dialog(CoderListActivity.this, R.style.mmdialog);
@@ -102,6 +108,54 @@ public class CoderListActivity extends Activity implements
 				super.onPostExecute(result);
 			}
 		}.execute(0);
+		bm = new BarcodeManager(this);
+		bl = new BarcodeListener() {
+			// 重写barcodeEvent 方法，获取条码事件
+			@Override
+			public void barcodeEvent(BarcodeEvent event) {
+				// 当条码事件的命令为“SCANNER_READ”时，进行操作
+				if (event.getOrder().equals("SCANNER_READ")) {
+					// 调用getBarcode()方法读取条码信息
+					barcode = bm.getBarcode();
+
+					new AsyncTask<Integer, Integer, String[]>() {
+
+						protected void onPreExecute() {
+							loadingdialog.show();
+							super.onPreExecute();
+						}
+
+						@Override
+						protected void onCancelled() {
+							super.onCancelled();
+						}
+
+						protected String[] doInBackground(Integer... params) {
+							resetList(barcode);
+							return null;
+						}
+
+						protected void onPostExecute(String[] result) {
+							// init();
+							if (exsit) {
+								adapter = new MyAdapter(CoderListActivity.this);
+								codeListView.setAdapter(adapter);
+
+							} else {
+								Toast.makeText(CoderListActivity.this,
+										getString(R.string.code_not_exsit),
+										Toast.LENGTH_SHORT).show();
+							}
+							search_et.setText(barcode);
+							loadingdialog.dismiss();
+							super.onPostExecute(result);
+						}
+					}.execute(0);
+
+				}
+			}
+		};
+		bm.addListener(bl);
 	}
 
 	// protected void init() {
@@ -211,10 +265,10 @@ public class CoderListActivity extends Activity implements
 				holder = (ViewHolder) convertView.getTag();
 			}
 			int pos = position + 1;
-			if (position < 10) {
+			if (position < 9) {
 				holder.codeNum.setText("0" + pos);
 			} else {
-				holder.codeNum.setText(pos);
+				holder.codeNum.setText(pos+"");
 			}
 			holder.codeText.setText(code_arr.get(position));
 			return convertView;
@@ -231,9 +285,9 @@ public class CoderListActivity extends Activity implements
 		CustomDialog.Builder customBuilder = new CustomDialog.Builder(
 				CoderListActivity.this);
 		customBuilder
-				.setTitle(getString(R.string.delete_title))
+				.setTitle("提示")
 				.setMessage(
-						getString(R.string.delete_message)
+						getString(R.string.delete_message)+"\n"
 								+ code_arr.get(position))
 				.setNegativeButton(getString(R.string.cancel),
 						new DialogInterface.OnClickListener() {
@@ -315,6 +369,9 @@ public class CoderListActivity extends Activity implements
 				intent.setClass(CoderListActivity.this, SubmmitCode.class);
 				CoderListActivity.this.finish();
 				startActivity(intent);
+				bm.removeListener(bl);
+				bm.dismiss();
+
 				db.close();
 				loadingdialog.dismiss();
 				super.onPostExecute(result);

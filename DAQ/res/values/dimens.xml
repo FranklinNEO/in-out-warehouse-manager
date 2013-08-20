@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="titleheightsize">72.0dip</dimen>
     <dimen name="XLargeTextSize">20.0dip</dimen>
     <dimen name="LargerTextSize">17.0dip</dimen>
     <dimen name="LargeTextSize">16.0dip</dimen>

@@ -41,8 +41,8 @@ public class PwdEditCancel extends LinearLayout implements EdtInterface {
 
 		et.addTextChangedListener(tw);// 为输入框绑定一个监听文字变化的监听器
 		et.setHint(getResources().getString(R.string.operator_password));
-		et.setInputType(InputType.TYPE_CLASS_NUMBER);
-		// et.setInputType(InputType.TYPE_DATETIME_VARIATION_NORMAL);
+		// et.setInputType(InputType.TYPE_CLASS_NUMBER);
+		et.setInputType(InputType.TYPE_DATETIME_VARIATION_NORMAL);
 		// 添加按钮点击事件
 		ib.setOnClickListener(new OnClickListener() {
 

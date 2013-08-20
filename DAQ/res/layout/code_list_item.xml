@@ -1,35 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
     android:orientation="horizontal" >
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="40dip"
+        android:layout_height="wrap_content"
         android:gravity="left|center_vertical"
         android:orientation="horizontal" >
 
         <TextView
             android:id="@+id/code_num"
-            android:layout_width="wrap_content"
-            android:layout_height="30dip"
-            android:background="@drawable/code_bg"
+            android:layout_width="48dip"
+            android:layout_height="wrap_content"
+            android:background="@drawable/blue_blank"
             android:gravity="center"
+            android:paddingBottom="6dip"
+            android:paddingTop="6dip"
             android:text="99"
-            android:layout_marginLeft="20dip"
-            android:textColor="@color/white"
+            android:textColor="@color/black_60_transparent"
             android:textSize="20sp" />
 
         <TextView
             android:id="@+id/codetv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5.0dip"
             android:layout_weight="1"
+            android:background="@drawable/white_blank"
             android:gravity="center"
+            android:paddingBottom="6dip"
+            android:paddingTop="6dip"
             android:text="TextView"
             android:textSize="20sp" />
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>

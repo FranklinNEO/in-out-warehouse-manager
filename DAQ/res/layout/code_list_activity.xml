@@ -28,7 +28,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/mmfooter_bg_white"
+            android:background="@drawable/panel_bg"
             android:orientation="horizontal" >
 
             <EditText
@@ -39,21 +39,24 @@
                 android:layout_marginLeft="3.0dip"
                 android:layout_marginTop="3.0dip"
                 android:layout_weight="1"
+                android:background="@drawable/search_bar_edit_bg"
                 android:ems="10"
                 android:hint="@string/scan_code"
-                android:singleLine="true" >
+                android:singleLine="true"
+                android:textSize="13sp" >
             </EditText>
 
             <Button
                 android:id="@+id/code_search"
-                android:layout_width="wrap_content"
+                android:layout_width="50dp"
                 android:layout_height="45dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="3.0dip"
                 android:layout_marginRight="3.0dip"
                 android:layout_marginTop="1.0dip"
-                android:background="@drawable/voice_rcd_btn_nor"
-                android:text="@string/search" />
+                android:background="@drawable/message_send_disable"
+                android:text="@string/search"
+                android:textColor="@color/mm_hyper_text" />
         </LinearLayout>
     </LinearLayout>
 

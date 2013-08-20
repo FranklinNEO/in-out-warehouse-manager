@@ -2,7 +2,6 @@ package com.redinfo.daq.app;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -16,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -33,7 +33,6 @@ public class StatisticsActivity extends Activity {
 	private statisticsAdapter adapter = null;
 	private OrderproductList opl = null;
 	private ArrayList<OrderproductList> productList = null;
-	private ArrayList<HashMap<Integer, Integer>> productNumInfo = null;
 	public Dialog loadingdialog = null;
 
 	@Override
@@ -51,10 +50,8 @@ public class StatisticsActivity extends Activity {
 			getOrderID(bundle.getString("order_Id"));
 			// orderID = Integer.parseInt(bundle.getString("order_Id"));
 			Log.d("orderID", orderID + "");
-			orderText.setText(getString(R.string.order_id) + ":	"
-					+ bundle.getString("order_Id"));
-			customerText.setText(getString(R.string.customer) + ":	"
-					+ bundle.getString("customer"));
+			orderText.setText(bundle.getString("order_Id"));
+			customerText.setText(bundle.getString("customer"));
 		} else {
 
 		}
@@ -314,9 +311,17 @@ public class StatisticsActivity extends Activity {
 		public TextView typeTV;
 		public TextView packageSpecTv;
 		public TextView pkgRatio;
-		public TextView codeLevelTv;
-		public TextView sumTv;
-
+		public TextView sumTv1;
+		public TextView sumTv2;
+		public TextView specTv;
+		public TextView codeLevelTv1;
+		public TextView codeLevelTv2;
+		public TextView codeLevelTv3;
+		public LinearLayout codell1;
+		public LinearLayout codell2;
+		public LinearLayout codell3;
+		public LinearLayout sumll1;
+		public LinearLayout sumll2;
 	}
 
 	// 自定义条码数据容纳器
@@ -356,9 +361,28 @@ public class StatisticsActivity extends Activity {
 						.findViewById(R.id.packageSpecTv);
 				holder.pkgRatio = (TextView) convertView
 						.findViewById(R.id.pkgRatioTv);
-				holder.codeLevelTv = (TextView) convertView
-						.findViewById(R.id.codeLevelInfoTv);
-				holder.sumTv = (TextView) convertView.findViewById(R.id.sumTv);
+				holder.codeLevelTv1 = (TextView) convertView
+						.findViewById(R.id.codeLevelInfoTv1);
+				holder.codeLevelTv2 = (TextView) convertView
+						.findViewById(R.id.codeLevelInfoTv2);
+				holder.codeLevelTv3 = (TextView) convertView
+						.findViewById(R.id.codeLevelInfoTv3);
+				holder.sumTv1 = (TextView) convertView
+						.findViewById(R.id.sumTv1);
+				holder.sumTv2 = (TextView) convertView
+						.findViewById(R.id.sumTv2);
+				holder.specTv = (TextView) convertView
+						.findViewById(R.id.SpecTv);
+				holder.codell1 = (LinearLayout) convertView
+						.findViewById(R.id.codelayout1);
+				holder.codell2 = (LinearLayout) convertView
+						.findViewById(R.id.codelayout2);
+				holder.codell3 = (LinearLayout) convertView
+						.findViewById(R.id.codelayout3);
+				holder.sumll1 = (LinearLayout) convertView
+						.findViewById(R.id.sum_ll1);
+				holder.sumll2 = (LinearLayout) convertView
+						.findViewById(R.id.sum_ll2);
 				convertView.setTag(holder);
 			} else {
 				holder = (ViewHolder) convertView.getTag();
@@ -366,17 +390,42 @@ public class StatisticsActivity extends Activity {
 			holder.productNameTv.setText(productList.get(position)
 					.getproductName());
 			holder.typeTV.setText(productList.get(position).gettype());
+			holder.specTv.setText(productList.get(position).getspec());
 			holder.packageSpecTv.setText(productList.get(position)
 					.getpackageSpec());
 			holder.pkgRatio.setText(productList.get(position).getpkgRatio());
-			holder.codeLevelTv.setText(getString(R.string.code_level1) + ":"
-					+ productList.get(position).getnum1() + ";	"
-					+ getString(R.string.code_level2) + ":"
-					+ productList.get(position).getnum2() + ";	"
-					+ getString(R.string.code_level3) + ":"
-					+ productList.get(position).getnum3());
-			holder.sumTv.setText(productList.get(position).getsum() + "	"
-					+ getString(R.string.unit));
+			int flag = 0;
+			char[] ratio = productList.get(position).getpkgRatio()
+					.toCharArray();
+			for (int i = 0; i < ratio.length; i++) {
+				if (ratio[i] == ':') {
+					flag++;
+				}
+			}
+			if (flag == 1) {
+				holder.codeLevelTv1.setText(productList.get(position).getnum1()
+						+ "");
+				holder.codeLevelTv2.setText(productList.get(position).getnum2()
+						+ "");
+				holder.codell3.setVisibility(View.GONE);
+				holder.sumll1.setVisibility(View.GONE);
+				holder.sumll2.setVisibility(View.VISIBLE);
+				holder.sumTv2.setText(productList.get(position).getsum() + "	"
+						+ getString(R.string.unit));
+			} else if (flag == 2) {
+				holder.codeLevelTv1.setText(productList.get(position).getnum1()
+						+ "");
+				holder.codeLevelTv2.setText(productList.get(position).getnum2()
+						+ "");
+				holder.codell3.setVisibility(View.VISIBLE);
+				holder.codeLevelTv3.setText(productList.get(position).getnum3()
+						+ "");
+				holder.sumll1.setVisibility(View.VISIBLE);
+				holder.sumTv1.setText(productList.get(position).getsum() + "	"
+						+ getString(R.string.unit));
+				holder.sumll2.setVisibility(View.GONE);
+			}
+
 			return convertView;
 		}
 	}

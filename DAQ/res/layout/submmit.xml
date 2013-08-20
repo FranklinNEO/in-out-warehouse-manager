@@ -17,7 +17,7 @@
             style="@style/TitleBarText"
             android:layout_gravity="center"
             android:paddingLeft="8dip"
-            android:text="@string/title_bar_name" />
+            android:text="条码扫描" />
 
         <Button
             android:id="@+id/scan_btn"
@@ -32,77 +32,127 @@
         </Button>
     </LinearLayout>
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:orientation="vertical"
-            android:paddingLeft="15.0dip"
-            android:paddingRight="15.0dip" >
-
-            <LinearLayout style="@style/MMLabelSplit" />
+            android:orientation="vertical" >
 
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical" >
+                android:orientation="vertical"
+                android:visibility="visible" >
 
                 <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="left"
-                    android:orientation="horizontal" >
+                    android:gravity="center"
+                    android:orientation="vertical" >
 
-                    <TextView
-                        android:id="@+id/orderText"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:text="TextView"
-                        android:textColor="@color/black_75_transparent" />
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:layout_width="70dip"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="left"
+                            android:background="@drawable/blue_blank"
+                            android:gravity="center"
+                            android:text="单号"
+                            android:textColor="@color/grey" />
+
+                        <TextView
+                            android:id="@+id/orderText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/blue_blank"
+                            android:gravity="center"
+                            android:text="" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:layout_width="70dip"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="left"
+                            android:background="@drawable/white_blank"
+                            android:gravity="center"
+                            android:text="客户"
+                            android:textColor="@color/grey" />
+
+                        <TextView
+                            android:id="@+id/customerText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/white_blank"
+                            android:gravity="center"
+                            android:text="" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout style="@style/MMLabelSplit" />
-
             <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/customerText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TextView"
-                    android:textColor="@color/black_75_transparent" />
-            </LinearLayout>
-
-            <LinearLayout style="@style/MMLabelSplit" />
-
-            <LinearLayout style="@style/MMLabelSplit" />
-
-            <ListView
-                android:id="@+id/code_result"
-                android:layout_width="fill_parent"
-                android:layout_height="240dp"
-                android:background="@drawable/scanresult_frame"
-                android:divider="@color/black_20_transparent"
-                android:dividerHeight="1dp" >
-            </ListView>
-
-            <LinearLayout style="@style/MMLabelSplit" />
-
-            <LinearLayout style="@style/MMLabelSplit" />
+                android:layout_width="10dip"
+                android:layout_height="5dip" />
 
             <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="48dip"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/blue_blank"
+                    android:gravity="center"
+                    android:text="#" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/white_blank"
+                    android:gravity="center"
+                    android:text="监管码前缀" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/blue_blank"
+                    android:gravity="center"
+                    android:text="数量" />
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/code_result"
+                android:layout_width="fill_parent"
+                android:layout_height="240dp"
+                android:background="@drawable/white_blank"
+                android:divider="@drawable/reader_item_divider" >
+            </ListView>
+
+            <LinearLayout style="@style/MMLabelSplit" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="15.0dip"
+                android:paddingRight="15.0dip" >
 
                 <Button
                     android:id="@+id/Barcode_List"
@@ -130,19 +180,18 @@
 
             <LinearLayout style="@style/MMLabelSplit" />
 
-            <LinearLayout style="@style/MMLabelSplit" />
-
             <Button
                 android:id="@+id/submmit"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginLeft="15.0dip"
+                android:layout_marginRight="15.0dip"
                 android:background="@drawable/btn_style_one_normal"
                 android:text="@string/finish"
                 android:textColor="@color/white" />
 
             <LinearLayout style="@style/MMLabelSplit" />
         </LinearLayout>
-    </ScrollView>
 
 </LinearLayout>

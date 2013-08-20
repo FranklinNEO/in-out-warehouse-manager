@@ -122,7 +122,7 @@ public class Loading extends Activity implements
 					Toast.makeText(
 							Loading.this,
 							getString(R.string.please_enter_customer_name_or_abrr),
-							Toast.LENGTH_LONG).show();
+							Toast.LENGTH_SHORT).show();
 				} else {
 					new AsyncTask<Integer, Integer, String[]>() {
 

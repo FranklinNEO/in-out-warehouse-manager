@@ -24,19 +24,19 @@ public class WriteXML {
 	 * @param list
 	 * @return
 	 */
-	public String orderType[] = { "IA", "IB", "IC", "ID", "OA", "OE", "OF",
-			"OC", "OD" };
-	public String FuncText[] = { "ProduceWareHouseIn", "ReturnWareHouseIn",
-			"PurchaseWareHouseIn", "AllocateWareHouseIn", "SalesWareHouseOut",
-			"DestoryWareHouseOut", "CheckWareHouseOut", "ReworkWareHouseOut",
-			"AllocateWareHouseOut" };
+	public String orderType[] = { "IA", "IC", "ID", "IB", "OA", "OB", "OD",
+			"OF", "OE" };
+	public String FuncText[] = { "ProduceWareHouseIn", "PurchaseWareHouseIn",
+			"AllocateWareHouseIn", "ReturnWareHouseIn", "SalesWareHouseOut",
+			"ReworkWareHouseOut", "AllocateWareHouseOut", "CheckWareHouseOut",
+			"DestoryWareHouseOut" };
 	public String MainAction[] = { "WareHouseIn", "WareHouseIn", "WareHouseIn",
 			"WareHouseIn", "WareHouseOut", "WareHouseOut", "WareHouseOut",
 			"WareHouseOut", "WareHouseOut" };
 	public int flag = 100;
 
 	public String saxToXml(OutputStream output, ArrayList<String> ActDate,
-			ArrayList<String> Code, String Actor, String CorpOrderID,
+			ArrayList<String> Code, ArrayList<String> Actor, String CorpOrderID,
 			String ToCorpID, int flag) {
 		String xmlStr = null;
 
@@ -104,7 +104,7 @@ public class WriteXML {
 					}
 				}
 				attr.addAttribute("", "", "ActDate", "ActDate", ActDate.get(i));
-				attr.addAttribute("", "", "Actor", "Actor", Actor);
+				attr.addAttribute("", "", "Actor", "Actor", Actor.get(i));
 				attr.addAttribute("", "", "CorpOrderID", "CorpOrderID",
 						CorpOrderID);
 				attr.addAttribute("", "", "Code", "Code", Code.get(i));

@@ -23,9 +23,8 @@
     <GridView
         android:id="@+id/gridView"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="345dip"
         android:layout_below="@+id/title"
-        android:layout_marginBottom="30.0dp"
         android:layout_marginLeft="20.0dp"
         android:layout_marginRight="20.0dp"
         android:layout_marginTop="30.0dp"
@@ -41,14 +40,16 @@
     <Button
         android:id="@+id/function"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="52dip"
         android:layout_alignLeft="@+id/gridView"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/gridView"
-        android:layout_marginBottom="10.0dp"
-        android:background="@drawable/login_button"
+        android:layout_marginBottom="20.0dp"
+        android:layout_marginLeft="20.0dp"
+        android:layout_marginRight="20.0dp"
+        android:background="@drawable/start_button"
         android:text="Button"
-        android:textColor="@color/mm_hyper_text"
-        android:textSize="19sp" />
+        android:textColor="@color/white"
+        android:textSize="22sp" />
 
 </RelativeLayout>

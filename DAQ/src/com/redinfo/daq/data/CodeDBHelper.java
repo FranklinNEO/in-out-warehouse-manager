@@ -263,11 +263,12 @@ public class CodeDBHelper extends SQLiteOpenHelper {
 		values.put("orderType", orderType);
 		values.put("CorpOrderID", CorpOrderID);
 		values.put("ToCorpID", ToCorpID);
-		values.put("flag", 1);
+		values.put("flag", flag);
 		values.put("createTime", createTime);
-		mDb.update(tablename, values, "orderType='" + orderType
-				+ "' AND CorpOrderID='" + CorpOrderID + "' AND ToCorpID='"
-				+ ToCorpID + "' AND createTime='" + createTime + "';", null);
+//		mDb.update(tablename, values, "orderType='" + orderType
+//				+ "' AND CorpOrderID='" + CorpOrderID + "' AND ToCorpID='"
+//				+ ToCorpID + "' AND createTime='" + createTime + "';", null);
+		mDb.update(tablename, values, "CorpOrderID='"+CorpOrderID+"';", null);
 		values.clear();
 	}
 
@@ -316,6 +317,10 @@ public class CodeDBHelper extends SQLiteOpenHelper {
 	public void delete_code(String tablename, String code20, int orderID) {
 		mDb.delete(tablename, "code20='" + code20 + "' AND orderID='" + orderID
 				+ "';", null);
+	}
+
+	public void delete_order(String tablename, String CorpOrderID) {
+		mDb.delete(tablename, "CorpOrderID='" + CorpOrderID + "';", null);
 	}
 
 	public void delete_product(String tablename) {

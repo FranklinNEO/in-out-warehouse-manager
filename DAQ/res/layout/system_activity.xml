@@ -29,7 +29,7 @@
         android:paddingTop="15dp" >
 
         <RelativeLayout
-            android:id="@+id/Loadlayout"
+            android:id="@+id/checkproductLayout"
             android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:background="@drawable/setting_list_bg"
@@ -41,16 +41,20 @@
                 android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="30dp"
-                android:text="@string/check_sys_file"
+                android:text="扫码产品信息校验"
                 android:textSize="15sp" />
 
-            <ImageView
+            <ToggleButton
+                android:id="@+id/toggleBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="18dp"
-                android:src="@drawable/icon_more_default" />
+                android:layout_marginRight="30dp"
+                android:background="@drawable/toggle_me"
+                android:checked="true"
+                android:textOff=""
+                android:textOn="" />
         </RelativeLayout>
 
         <View
@@ -71,6 +75,69 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="30dp"
                 android:text="@string/select_the_import_export_function"
+                android:textSize="15sp" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="18dp"
+                android:src="@drawable/icon_more_default" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="18dp" />
+
+        <RelativeLayout
+            android:id="@+id/PurchaseWareHouseInlayout"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/setting_list_bg"
+            android:padding="5dp" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="30dp"
+                android:text="购买入库设置"
+                android:textSize="15sp" />
+
+            <ToggleButton
+                android:id="@+id/customer_setting_Btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/toggle_me"
+                android:checked="true"
+                android:textOff=""
+                android:textOn="" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="18dp" />
+
+        <RelativeLayout
+            android:id="@+id/Customerlayout"
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/setting_list_bg"
+            android:padding="5dp" >
+
+            <TextView
+                android:id="@+id/custoemrTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="30dp"
+                android:text="选择购买入库客户"
                 android:textSize="15sp" />
 
             <ImageView

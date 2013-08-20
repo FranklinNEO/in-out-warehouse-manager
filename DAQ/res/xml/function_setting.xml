@@ -6,29 +6,29 @@
             android:key="ProduceWareHouseIn"
             android:title="@string/open_produce_ware_house_in" />
         <CheckBoxPreference
-            android:key="ReturnWareHouseIn"
-            android:title="@string/open_return_ware_house_in" />
-        <CheckBoxPreference
             android:key="PurchaseWareHouseIn"
             android:title="@string/open_purchase_ware_house_in" />
         <CheckBoxPreference
             android:key="AllocateWareHouseIn"
             android:title="@string/open_allocate_ware_house_in" />
         <CheckBoxPreference
+            android:key="ReturnWareHouseIn"
+            android:title="@string/open_return_ware_house_in" />
+        <CheckBoxPreference
             android:key="SalesWareHouseOut"
             android:title="@string/open_sales_ware_house_out" />
-        <CheckBoxPreference
-            android:key="DestoryWareHouseOut"
-            android:title="@string/open_destory_ware_house_out" />
-        <CheckBoxPreference
-            android:key="CheckWareHouseOut"
-            android:title="@string/open_check_ware_house_out" />
         <CheckBoxPreference
             android:key="ReturnWareHouseOut"
             android:title="@string/open_return_ware_house_out" />
         <CheckBoxPreference
             android:key="AllocateWareHouseOut"
             android:title="@string/open_allocate_ware_house_out" />
+        <CheckBoxPreference
+            android:key="CheckWareHouseOut"
+            android:title="@string/open_check_ware_house_out" />
+        <CheckBoxPreference
+            android:key="DestoryWareHouseOut"
+            android:title="@string/open_destory_ware_house_out" />
     </PreferenceCategory>
 
 </PreferenceScreen>
