@@ -33,7 +33,7 @@ public class SystemInfo extends Activity {
 				.fromHtml("<a href=\"http://www.redinfo.com\">http://www.redinfo.com</a>"));
 		link.setMovementMethod(LinkMovementMethod.getInstance());
 		TextView tvVerson = (TextView) findViewById(R.id.vesion);
-		tvVerson.setText("V" + verson);
+		tvVerson.setText("V" + verson.substring(0,3));
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
 		int year = Integer.parseInt(sdf.format(new Date()));
 		TextView copyTv = (TextView) findViewById(R.id.copyright);

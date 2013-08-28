@@ -3,14 +3,10 @@ package com.redinfo.daq.app;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -31,14 +27,14 @@ import com.redinfo.daq.R;
 import com.redinfo.daq.data.CodeDBHelper;
 import com.redinfo.daq.ui.CorpOrderConfirmEditCancel;
 import com.redinfo.daq.ui.CorpOrderEditCancel;
-import com.redinfo.daq.ui.CustomDialog;
 import com.redinfo.daq.util.ExportXML;
 
 public class ActionActivity extends Activity implements OnClickListener {
 
 	private static final int CUSTOMER_INTENT_REQ_CODE = 0x966;
-	private static final int MENU_LOGOUT = Menu.FIRST;
-	private static final int MENU_ORDERLIST = Menu.FIRST + 1;
+	// private static final int MENU_LOGOUT = Menu.FIRST;
+	// private static final int MENU_ORDERLIST = Menu.FIRST + 1;
+	private static final int MENU_ORDERLIST = Menu.FIRST;
 
 	public final static String URL = "/data/data/com.redinfo.daq/databases";
 	public final static String DB_FILE_NAME = "info.db";
@@ -282,7 +278,16 @@ public class ActionActivity extends Activity implements OnClickListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, MENU_LOGOUT, 0, getString(R.string.logout_account));
+
+		// MenuInflater menuInflater = getMenuInflater();
+		// menuInflater.inflate(R.menu.action, menu);
+		// MenuItem orderlist = menu.findItem(R.id.action_order_list);
+		// MenuItem logout = menu.findItem(R.id.action_logout);
+		// MenuItemCompat.setShowAsAction(orderlist,
+		// MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
+		// MenuItemCompat.setShowAsAction(logout,
+		// MenuItemCompat.SHOW_AS_ACTION_WITH_TEXT);
+		// F menu.add(0, MENU_LOGOUT, 0, getString(R.string.logout_account));
 		menu.add(0, MENU_ORDERLIST, 0, getString(R.string.order_list));
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -290,50 +295,51 @@ public class ActionActivity extends Activity implements OnClickListener {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case MENU_LOGOUT:
-			Dialog dialog = null;
-			CustomDialog.Builder customBuilder = new CustomDialog.Builder(
-					ActionActivity.this);
-			customBuilder
-					.setTitle(getString(R.string.attention))
-					.setMessage(getString(R.string.confirm_to_logout))
-					.setNegativeButton(getString(R.string.cancel),
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int which) {
-									dialog.dismiss();
-								}
-							})
-					.setPositiveButton(getString(R.string.logout_button),
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int which) {
-									try {
-										FileOutputStream outStream = ActionActivity.this
-												.openFileOutput("userInfo.txt",
-														Context.MODE_PRIVATE);
-										String content = "" + "," + "" + ","
-												+ "";
-										outStream.write(content.getBytes());
-										outStream.close();
-									} catch (IOException ex) {
-									}
-									Intent intent = new Intent(
-											getApplication(),
-											LoginActivity.class);
-									intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-									startActivity(intent);
-									ActionActivity.this.finish();
-									dialog.dismiss();
-								}
-							});
-			dialog = customBuilder.create();
-			dialog.show();
-			return true;
+		// case MENU_LOGOUT:
+		// Dialog dialog = null;
+		// CustomDialog.Builder customBuilder = new CustomDialog.Builder(
+		// ActionActivity.this);
+		// customBuilder
+		// .setTitle(getString(R.string.attention))
+		// .setMessage(getString(R.string.confirm_to_logout))
+		// .setNegativeButton(getString(R.string.cancel),
+		// new DialogInterface.OnClickListener() {
+		// public void onClick(DialogInterface dialog,
+		// int which) {
+		// dialog.dismiss();
+		// }
+		// })
+		// .setPositiveButton(getString(R.string.logout_button),
+		// new DialogInterface.OnClickListener() {
+		// public void onClick(DialogInterface dialog,
+		// int which) {
+		// try {
+		// FileOutputStream outStream = ActionActivity.this
+		// .openFileOutput("userInfo.txt",
+		// Context.MODE_PRIVATE);
+		// String content = "" + "," + "" + ","
+		// + "";
+		// outStream.write(content.getBytes());
+		// outStream.close();
+		// } catch (IOException ex) {
+		// }
+		// Intent intent = new Intent(
+		// getApplication(),
+		// LoginActivity.class);
+		// intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		// startActivity(intent);
+		// ActionActivity.this.finish();
+		// dialog.dismiss();
+		// }
+		// });
+		// dialog = customBuilder.create();
+		// dialog.show();
+		// return true;
 		case MENU_ORDERLIST:
 			Intent intent = new Intent();
 			intent.setClass(ActionActivity.this, ExportXML.class);
 			startActivity(intent);
+			this.finish();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

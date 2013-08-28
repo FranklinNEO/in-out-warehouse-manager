@@ -147,7 +147,8 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 						Environment.MEDIA_MOUNTED)) {
 					File destDir = new File(
 							Environment.getExternalStorageDirectory(),
-							"/RedInfo/OrderList/");
+							"/RedInfo/OrderList/" + createTime.substring(0, 10)
+									+ "/");
 					if (!destDir.exists()) {
 						destDir.mkdirs();
 					}
@@ -156,6 +157,7 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 							ExportFILE);
 					new WriteXML().saxToXml(outStream, Code_Date, Code_Result,
 							Actor_ID, OrderID, code, Func);
+
 					Toast.makeText(StateChangeActivity.this,
 							getString(R.string.have_export_to_sd),
 							Toast.LENGTH_SHORT).show();

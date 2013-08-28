@@ -34,6 +34,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -83,6 +84,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	public String orderType[] = { "IA", "IC", "ID", "IB", "OA", "OB", "OD",
 			"OF", "OE" };
 	private SharedPreferences sharedpreferences;
+	private String type = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +120,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		code = bundle.getString("customer_Code");
 		OrderID = bundle.getString("order_Id");
 		createTime = bundle.getString("order_createTime");
+
 		// continueOrder=Integer.parseInt(bundle.getString("continueOrder"));
 		Code_List = (ListView) findViewById(R.id.code_result);
 		BarcodeResult = new ArrayList<String>();
@@ -178,7 +181,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 							m_db.insert_code(
 									CodeDBHelper.ORDER_CODE_TABLE_NAME,
 									barcode, barcode.substring(0, 2), barcode
-											.substring(3, 8),
+											.substring(2, 7),
 									((DaqApplication) getApplication())
 											.getActorId(), CodeDate,
 									getproductID(barcode), getorderID());
@@ -227,7 +230,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	protected int getproductID(String barcode) {
 		// TODO Auto-generated method stub
 		String codeVersion = barcode.substring(0, 2);
-		String resCode = barcode.substring(3, 8);
+		String resCode = barcode.substring(2, 7);
 		File file = new File(URL, DB_FILE_NAME);
 		db = SQLiteDatabase.openOrCreateDatabase(file, null);
 		String sql = "SELECT productID FROM products_data WHERE codeVersion='"
@@ -289,7 +292,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		}
 		String checksql = "SELECT * FROM products_data WHERE codeVersion='"
 				+ contents.substring(0, 2) + "' AND resCode='"
-				+ contents.substring(3, 8) + "';";
+				+ contents.substring(2, 7) + "';";
 		String sql = "SELECT * FROM orderCode_data WHERE code20='" + contents
 				+ "'AND orderID='" + getorderID() + "';";
 		if (sharedpreferences.getBoolean("checkproductInfo", true)) {
@@ -464,6 +467,40 @@ public class SubmmitCode extends Activity implements OnClickListener {
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int which) {
+									String sql = "SELECT * FROM order_data WHERE CorpOrderID ='"
+											+ OrderID
+											+ "' ORDER BY flag,datetime(createTime) DESC;";
+									Cursor cur = db.rawQuery(sql, null);
+
+									if (cur != null && cur.moveToFirst()) {
+										do {
+
+											type = cur.getString(cur
+													.getColumnIndex("orderType"));
+											Log.d("type",
+													cur.getString(cur
+															.getColumnIndex("orderType")));
+										} while ((cur.moveToNext()));
+									}
+									if (type.equals("OA")) {
+										flag = 4;
+									} else if (type.equals("OB")) {
+										flag = 5;
+									} else if (type.equals("OD")) {
+										flag = 6;
+									} else if (type.equals("OE")) {
+										flag = 8;
+									} else if (type.equals("OF")) {
+										flag = 7;
+									} else if (type.equals("IA")) {
+										flag = 0;
+									} else if (type.equals("IB")) {
+										flag = 3;
+									} else if (type.equals("IC")) {
+										flag = 1;
+									} else if (type.equals("ID")) {
+										flag = 2;
+									}
 									String code_sql = "SELECT * FROM orderCode_data WHERE orderID='"
 											+ order_id + "';";
 									Cursor cur_code = db.rawQuery(code_sql,
@@ -502,7 +539,12 @@ public class SubmmitCode extends Activity implements OnClickListener {
 												File destDir = new File(
 														Environment
 																.getExternalStorageDirectory(),
-														"/RedInfo/OrderList/");
+														"/RedInfo/OrderList/"
+																+ createTime
+																		.substring(
+																				0,
+																				10)
+																+ "/");
 												if (!destDir.exists()) {
 													destDir.mkdirs();
 												}
@@ -700,7 +742,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 					this.BarcodeDate.add(CodeDate);
 					m_db.insert_code(CodeDBHelper.ORDER_CODE_TABLE_NAME,
 							contents, contents.substring(0, 2),
-							contents.substring(3, 8),
+							contents.substring(2, 7),
 							((DaqApplication) getApplication()).getActorId(),
 							CodeDate, getproductID(contents), getorderID());
 					UpdateCodeList();

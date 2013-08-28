@@ -1,7 +1,10 @@
 package com.redinfo.daq.util;
 
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import javax.xml.transform.OutputKeys;
@@ -36,17 +39,26 @@ public class WriteXML {
 	public int flag = 100;
 
 	public String saxToXml(OutputStream output, ArrayList<String> ActDate,
-			ArrayList<String> Code, ArrayList<String> Actor, String CorpOrderID,
-			String ToCorpID, int flag) {
+			ArrayList<String> Code, ArrayList<String> Actor,
+			String CorpOrderID, String ToCorpID, int flag) {
 		String xmlStr = null;
+		// File destDir = new File(Environment.getExternalStorageDirectory(),
+		// "/RedInfo/OrderList/");
+		// File CacheFile = new File(destDir, "Cache.xml");// 取得sd卡的目录及要保存的文件名
 
 		try {
+			// FileOutputStream outStream = new FileOutputStream(CacheFile);
 			// 用来生成XML文件
 			// 实现此接口的对象包含构建转换结果树所需的信息
-			Result resultXml = new StreamResult(output);
+			// Writer foutw = new BufferedWriter(new OutputStreamWriter(output,
+			// "UTF-8"));
+			output.write(new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF });
+			Result resultXml = new StreamResult(new OutputStreamWriter(output,
+					"UTF-8"));
 
 			// 用来得到XML字符串形式
 			// 一个字符流，可以用其回收在字符串缓冲区中的输出来构造字符串
+			// StringWriter writerStr = new StringWriter();
 			StringWriter writerStr = new StringWriter();
 			// 构建转换结果树所需的信息。
 
@@ -70,17 +82,19 @@ public class WriteXML {
 			th.startDocument();
 			AttributesImpl attr = new AttributesImpl();
 			attr.addAttribute("", "Version", "Version", "", "3.0");
+			attr.addAttribute("", "xmlns:xsi", "xmlns:xsi", "",
+					"http://www.w3.org/2001/XMLSchema-instance");
 			th.startElement("", "Document", "Document", attr);
 
 			// 创建一级子元素<Events>,并设置其属性
 			attr.clear();
-
+			th.startElement("", "", "Events", null);
 			attr.addAttribute("", "MainAction", "MainAction", "",
 					MainAction[flag]);
 			attr.addAttribute("", "Name", "Name", "", FuncText[flag]);
-
-			th.startElement("", "", "Events", attr);
+			// th.startElement("", "", "Events", attr);
 			// 创建二级子元素<DataField>,并设置其属性
+			th.startElement("", "", "Event", attr);
 			attr.clear();
 			th.startElement("", "", "DataField", attr);
 			for (int i = 0; i < Code.size(); i++) {
@@ -113,6 +127,7 @@ public class WriteXML {
 			}
 
 			th.endElement("", "", "DataField");
+			th.endElement("", "", "Event");
 			th.endElement("", "", "Events");
 			th.endElement("", "Document", "Document");
 			th.endDocument();
@@ -125,6 +140,24 @@ public class WriteXML {
 			Log.e("TEST", "" + e.toString());
 		}
 		Log.e("TEST", "生成的" + xmlStr);
-		return xmlStr;
+		return getUTF8XMLString(xmlStr);
+	}
+
+	public static String getUTF8XMLString(String xml) {
+		// A StringBuffer Object
+		StringBuffer sb = new StringBuffer();
+		sb.append(xml);
+		String xmString = "";
+		String xmlUTF8 = "";
+		try {
+			xmString = new String(sb.toString().getBytes("UTF-8"));
+			xmlUTF8 = URLEncoder.encode(xmString, "UTF-8");
+			System.out.println("utf-8 编码：" + xmlUTF8);
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// return to String Formed
+		return xmlUTF8;
 	}
 }

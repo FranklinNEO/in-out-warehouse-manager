@@ -1,11 +1,8 @@
 package com.redinfo.daq.util;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -80,7 +77,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 	public CodeDBHelper m_db = null;
 	public PopupWindow mPopupWindow;
 	private ArrayList<HashMap<String, String>> Order = new ArrayList<HashMap<String, String>>();
-	private ArrayList<Integer> flag = new ArrayList<Integer>();
+	private ArrayList<Integer> flaglist = new ArrayList<Integer>();
 	private CustomAdapter adapter;
 	private MyAdapter madapter;
 	private ListView List;
@@ -89,8 +86,9 @@ public class ExportXML extends Activity implements OnItemClickListener,
 	private Button searchBtn = null;
 	private EditText searchEdit = null;
 	private int pos;
+	private int flag = -1;
 	private int filter;
-	private int Func = 100;
+	// private int Func = 100;
 	private String sql = null;
 	String createTime = null;
 	String ToCorpID = null;
@@ -207,7 +205,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 						}
 						Cursor cur = db.rawQuery(sql, null);
 						Order = new ArrayList<HashMap<String, String>>();
-						flag = new ArrayList<Integer>();
+						flaglist = new ArrayList<Integer>();
 						if (cur != null && cur.moveToFirst()) {
 							do {
 								HashMap<String, String> map = new HashMap<String, String>();
@@ -222,7 +220,8 @@ public class ExportXML extends Activity implements OnItemClickListener,
 								map.put("ocodeOrderID",
 										cur.getInt(cur.getColumnIndex("_id"))
 												+ "");
-								flag.add(cur.getInt(cur.getColumnIndex("flag")));
+								flaglist.add(cur.getInt(cur
+										.getColumnIndex("flag")));
 								String count_sql = "SELECT count (*) AS codeNum FROM orderCode_data WHERE orderID='"
 										+ cur.getInt(cur.getColumnIndex("_id"))
 										+ "';";
@@ -356,24 +355,24 @@ public class ExportXML extends Activity implements OnItemClickListener,
 		};
 		loadingdialog = new Dialog(ExportXML.this, R.style.mmdialog);
 		loadingdialog.setContentView(R.layout.loading_dialog);
-		FileInputStream inStream = null;
-		ByteArrayOutputStream outStream = null;
-		try {
-			inStream = this.openFileInput("funcInfo.txt");
-			outStream = new ByteArrayOutputStream();
-			byte[] buffer = new byte[1024];
-			int length = -1;
-			while ((length = inStream.read(buffer)) != -1) {
-				outStream.write(buffer, 0, length);
-			}
-			String content = outStream.toString();
-			if (content != null) {
-				Func = Integer.parseInt(content.trim());
-			}
-			outStream.close();
-			inStream.close();
-		} catch (IOException ex) {
-		}
+		// FileInputStream inStream = null;
+		// ByteArrayOutputStream outStream = null;
+		// try {
+		// inStream = this.openFileInput("funcInfo.txt");
+		// outStream = new ByteArrayOutputStream();
+		// byte[] buffer = new byte[1024];
+		// int length = -1;
+		// while ((length = inStream.read(buffer)) != -1) {
+		// outStream.write(buffer, 0, length);
+		// }
+		// String content = outStream.toString();
+		// if (content != null) {
+		// Func = Integer.parseInt(content.trim());
+		// }
+		// outStream.close();
+		// inStream.close();
+		// } catch (IOException ex) {
+		// }
 
 		new AsyncTask<Integer, Integer, String[]>() {
 
@@ -420,59 +419,55 @@ public class ExportXML extends Activity implements OnItemClickListener,
 				// default:
 				// break;
 				// }
-				if (Func != 100) {
-					// sql = "SELECT * FROM order_data WHERE orderType='"
-					// + orderType[Func] + "';";
-					sql = "SELECT * FROM order_data ORDER BY flag,datetime(createTime) DESC;";
-					Cursor cur = db.rawQuery(sql, null);
-					Order = new ArrayList<HashMap<String, String>>();
-					flag = new ArrayList<Integer>();
-					if (cur != null && cur.moveToFirst()) {
-						do {
-							HashMap<String, String> map = new HashMap<String, String>();
-							map.put("oID", cur.getString(cur
-									.getColumnIndex("CorpOrderID")));
-							map.put("oCorpID", cur.getString(cur
-									.getColumnIndex("ToCorpID")));
-							map.put("oTime", cur.getString(cur
-									.getColumnIndex("createTime")));
-							map.put("oType", cur.getString(cur
-									.getColumnIndex("orderType")));
-							Log.d("type", cur.getString(cur
-									.getColumnIndex("orderType")));
-							map.put("ocodeOrderID",
-									cur.getInt(cur.getColumnIndex("_id")) + "");
-							flag.add(cur.getInt(cur.getColumnIndex("flag")));
-							String count_sql = "SELECT count (*) AS codeNum FROM orderCode_data WHERE orderID='"
-									+ cur.getInt(cur.getColumnIndex("_id"))
-									+ "';";
-							Cursor count_cur = db.rawQuery(count_sql, null);
-							if (count_cur != null & count_cur.moveToFirst()) {
-								map.put("oCount",
-										count_cur.getInt(count_cur
-												.getColumnIndex("codeNum"))
-												+ "");
-							}
-							String customer_sql = "SELECT * FROM customer_data WHERE customerID='"
-									+ map.get("oCorpID") + "';";
-							Cursor customer_cur = db.rawQuery(customer_sql,
-									null);
-							if (customer_cur != null
-									& customer_cur.moveToFirst()) {
-								map.put("oCustomer",
-										customer_cur.getString(customer_cur
-												.getColumnIndex("customerName")));
-							} else {
-								map.put("oCustomer", "");
-							}
-							Order.add(map);
-						} while ((cur.moveToNext()));
-						cur.close();
-						db.close();
-					} else {
-						cur.close();
-						db.close();
-					}
+				// if (Func != 100) {
+				// sql = "SELECT * FROM order_data WHERE orderType='"
+				// + orderType[Func] + "';";
+				sql = "SELECT * FROM order_data ORDER BY flag,datetime(createTime) DESC;";
+				Cursor cur = db.rawQuery(sql, null);
+				Order = new ArrayList<HashMap<String, String>>();
+				flaglist = new ArrayList<Integer>();
+				if (cur != null && cur.moveToFirst()) {
+					do {
+						HashMap<String, String> map = new HashMap<String, String>();
+						map.put("oID", cur.getString(cur
+								.getColumnIndex("CorpOrderID")));
+						map.put("oCorpID",
+								cur.getString(cur.getColumnIndex("ToCorpID")));
+						map.put("oTime",
+								cur.getString(cur.getColumnIndex("createTime")));
+						map.put("oType",
+								cur.getString(cur.getColumnIndex("orderType")));
+						Log.d("type",
+								cur.getString(cur.getColumnIndex("orderType")));
+						map.put("ocodeOrderID",
+								cur.getInt(cur.getColumnIndex("_id")) + "");
+						flaglist.add(cur.getInt(cur.getColumnIndex("flag")));
+						String count_sql = "SELECT count (*) AS codeNum FROM orderCode_data WHERE orderID='"
+								+ cur.getInt(cur.getColumnIndex("_id")) + "';";
+						Cursor count_cur = db.rawQuery(count_sql, null);
+						if (count_cur != null & count_cur.moveToFirst()) {
+							map.put("oCount",
+									count_cur.getInt(count_cur
+											.getColumnIndex("codeNum")) + "");
+						}
+						String customer_sql = "SELECT * FROM customer_data WHERE customerID='"
+								+ map.get("oCorpID") + "';";
+						Cursor customer_cur = db.rawQuery(customer_sql, null);
+						if (customer_cur != null & customer_cur.moveToFirst()) {
+							map.put("oCustomer", customer_cur
+									.getString(customer_cur
+											.getColumnIndex("customerName")));
+						} else {
+							map.put("oCustomer", "");
+						}
+						Order.add(map);
+					} while ((cur.moveToNext()));
+					cur.close();
+					db.close();
+					// } else {
+					// cur.close();
+					// db.close();
+					// }
 				}
 
 				return null;
@@ -522,7 +517,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 								if (orderCode_cur != null
 										&& orderCode_cur.moveToFirst()) {
 									Order = new ArrayList<HashMap<String, String>>();
-									flag = new ArrayList<Integer>();
+									flaglist = new ArrayList<Integer>();
 									do {
 										sql = "SELECT * FROM order_data WHERE _id='"
 												+ orderCode_cur
@@ -549,7 +544,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 														cur.getInt(cur
 																.getColumnIndex("_id"))
 																+ "");
-												flag.add(cur.getInt(cur
+												flaglist.add(cur.getInt(cur
 														.getColumnIndex("flag")));
 												String count_sql = "SELECT count (*) AS codeNum FROM orderCode_data WHERE orderID='"
 														+ cur.getInt(cur
@@ -793,7 +788,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 			holder.OrderInfo.setText(getString(R.string.tiaomazongliang)
 					+ Order.get(position).get("oCount") + "\n"
 					+ Order.get(position).get("oCustomer"));
-			if ((flag.get(position)) == 1) {
+			if ((flaglist.get(position)) == 1) {
 				holder.OrderState.setTextColor(Color.parseColor("#ff2e5f93"));
 				holder.OrderState.setText(getString(R.string.have_export_text));
 			} else {
@@ -808,13 +803,32 @@ public class ExportXML extends Activity implements OnItemClickListener,
 	@Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 		pos = position;
-
+		String type = Order.get(pos).get("oType");
+		if (type.equals("OA")) {
+			flag = 4;
+		} else if (type.equals("OB")) {
+			flag = 5;
+		} else if (type.equals("OD")) {
+			flag = 6;
+		} else if (type.equals("OE")) {
+			flag = 8;
+		} else if (type.equals("OF")) {
+			flag = 7;
+		} else if (type.equals("IA")) {
+			flag = 0;
+		} else if (type.equals("IB")) {
+			flag = 3;
+		} else if (type.equals("IC")) {
+			flag = 1;
+		} else if (type.equals("ID")) {
+			flag = 2;
+		}
 		if (sharedpreferences.getBoolean("checkproductInfo", true)) {
 			Dialog dialog = null;
 			CustomDialog.Builder customBuilder = new CustomDialog.Builder(
 					ExportXML.this);
 
-			if (flag.get(position) != 1) {
+			if (flaglist.get(position) != 1) {
 				customBuilder
 						.setTitle(
 								getString(R.string.danjuhao)
@@ -970,7 +984,14 @@ public class ExportXML extends Activity implements OnItemClickListener,
 													File destDir = new File(
 															Environment
 																	.getExternalStorageDirectory(),
-															"/RedInfo/OrderList/");
+															"/RedInfo/OrderList/"
+																	+ Order.get(
+																			pos)
+																			.get("oTime")
+																			.substring(
+																					0,
+																					10)
+																	+ "/");
 													if (!destDir.exists()) {
 														destDir.mkdirs();
 													}
@@ -979,8 +1000,10 @@ public class ExportXML extends Activity implements OnItemClickListener,
 																	pos).get(
 																	"oID")
 																	+ ".xml");// 取得sd卡的目录及要保存的文件名
+
 													FileOutputStream outStream = new FileOutputStream(
 															ExportFILE);
+
 													new WriteXML().saxToXml(
 															outStream,
 															Code_Date,
@@ -990,7 +1013,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 																	"oID"),
 															Order.get(pos).get(
 																	"oCorpID"),
-															Func);
+															flag);
 													Toast.makeText(
 															ExportXML.this,
 															getString(R.string.have_export_to_sd),
@@ -998,7 +1021,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 															.show();
 													m_db.update_order(
 															"order_data",
-															orderType[Func],
+															orderType[flag],
 															Order.get(pos).get(
 																	"oID"),
 															Order.get(pos).get(
@@ -1006,7 +1029,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 															1,
 															Order.get(pos).get(
 																	"oTime"));
-													flag.set(pos, 1);
+													flaglist.set(pos, 1);
 													dialog.dismiss();
 													adapter = new CustomAdapter(
 															ExportXML.this);
@@ -1074,7 +1097,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 				bundle.putString("customer_Code", ToCorpID);
 				bundle.putString("codeNum", Order.get(pos).get("oCount"));
 				bundle.putString("order", Order.get(pos).get("ocodeOrderID"));
-				bundle.putString("func", Func + "");
+				bundle.putString("func", flag + "");
 				bundle.putString("flag", "1");
 				intent.putExtras(bundle);
 				intent.setClass(ExportXML.this, StateChangeActivity.class);
@@ -1151,7 +1174,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 			CustomDialog.Builder customBuilder = new CustomDialog.Builder(
 					ExportXML.this);
 
-			if (flag.get(position) != 1) {
+			if (flaglist.get(position) != 1) {
 				customBuilder
 						.setTitle(
 								getString(R.string.danjuhao)
@@ -1196,7 +1219,6 @@ public class ExportXML extends Activity implements OnItemClickListener,
 											cur_code.close();
 											db.close();
 										}
-
 										try {
 											if (Environment
 													.getExternalStorageState()
@@ -1231,7 +1253,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 																	"oID"),
 															Order.get(pos).get(
 																	"oCorpID"),
-															Func);
+															flag);
 													Toast.makeText(
 															ExportXML.this,
 															getString(R.string.have_export_to_sd),
@@ -1239,7 +1261,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 															.show();
 													m_db.update_order(
 															"order_data",
-															orderType[Func],
+															orderType[flag],
 															Order.get(pos).get(
 																	"oID"),
 															Order.get(pos).get(
@@ -1257,8 +1279,8 @@ public class ExportXML extends Activity implements OnItemClickListener,
 															Order.get(pos).get(
 																	"oTime"));
 													Log.d("export",
-															orderType[Func]);
-													flag.set(pos, 1);
+															orderType[flag]);
+													flaglist.set(pos, 1);
 													dialog.dismiss();
 													adapter = new CustomAdapter(
 															ExportXML.this);
@@ -1424,7 +1446,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 				bundle.putString("customer_Abbr", customerInitial);
 				bundle.putString("customer_Code", ToCorpID);
 				bundle.putString("codeNum", Order.get(pos).get("oCount"));
-				bundle.putString("func", Func + "");
+				bundle.putString("func", flag + "");
 				bundle.putString("flag", "0");
 				intent.putExtras(bundle);
 				intent.setClass(ExportXML.this, StateChangeActivity.class);
@@ -1482,7 +1504,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 								+ "%' ORDER BY flag,datetime(createTime) DESC;";
 						Cursor cur = db.rawQuery(sql, null);
 						Order = new ArrayList<HashMap<String, String>>();
-						flag = new ArrayList<Integer>();
+						flaglist = new ArrayList<Integer>();
 						if (cur != null && cur.moveToFirst()) {
 							do {
 								HashMap<String, String> map = new HashMap<String, String>();
@@ -1497,7 +1519,8 @@ public class ExportXML extends Activity implements OnItemClickListener,
 								map.put("ocodeOrderID",
 										cur.getInt(cur.getColumnIndex("_id"))
 												+ "");
-								flag.add(cur.getInt(cur.getColumnIndex("flag")));
+								flaglist.add(cur.getInt(cur
+										.getColumnIndex("flag")));
 								String count_sql = "SELECT count (*) AS codeNum FROM orderCode_data WHERE orderID='"
 										+ cur.getInt(cur.getColumnIndex("_id"))
 										+ "';";
@@ -1537,7 +1560,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 						if (orderCode_cur != null
 								&& orderCode_cur.moveToFirst()) {
 							Order = new ArrayList<HashMap<String, String>>();
-							flag = new ArrayList<Integer>();
+							flaglist = new ArrayList<Integer>();
 							do {
 								sql = "SELECT * FROM order_data WHERE _id='"
 										+ orderCode_cur.getInt(orderCode_cur
@@ -1559,7 +1582,7 @@ public class ExportXML extends Activity implements OnItemClickListener,
 												cur.getInt(cur
 														.getColumnIndex("_id"))
 														+ "");
-										flag.add(cur.getInt(cur
+										flaglist.add(cur.getInt(cur
 												.getColumnIndex("flag")));
 										String count_sql = "SELECT count (*) AS codeNum FROM orderCode_data WHERE orderID='"
 												+ cur.getInt(cur

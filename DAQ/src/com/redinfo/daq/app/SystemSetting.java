@@ -67,6 +67,7 @@ public class SystemSetting extends Activity implements OnClickListener {
 			customerBtn.setChecked(true);
 			customersetting.setVisibility(View.VISIBLE);
 			customerTv.setText(sharedpreferences.getString("name", "选择购买入库客户"));
+			hascustomer = true;
 		} else {
 			customerBtn.setChecked(false);
 			customersetting.setVisibility(View.GONE);
