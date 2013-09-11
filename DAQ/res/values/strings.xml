@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="intentAction">com.redinfo.red4s.daq.RECVR</string>
     <string name="produce_ware_house_in">生产入库</string>
     <string name="return_ware_house_in">退货入库</string>
     <string name="purchase_ware_house_in">购买入库</string>
@@ -181,5 +182,11 @@
     <string name="all">全部</string>
     <string name="delete_order">删除此单据</string>
     <string name="delete_order_message">确定要删除此单据吗？删除后该单据所有数据将无法恢复</string>
+    <string name="system_info_version">(安卓版)</string>
+    <string name="system_info_copyright">瑞德信息 版权所有</string>
+    <string name="scan_barcode">条码扫描</string>
+    <string name="bcm_abbr">监管码前缀</string>
+    <string name="amount">数量</string>
+    <string name="please_enter_bcm_code">请输入20位监管码</string>
 
 </resources>

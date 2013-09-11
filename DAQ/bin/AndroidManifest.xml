@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.redinfo.daq"
-    android:versionCode="8"
-    android:versionName="3.0.082801" >
+    android:versionCode="10"
+    android:versionName="3.0.091101" >
 
     <uses-sdk
         android:minSdkVersion="8"
@@ -37,7 +37,7 @@
     <application
         android:name="com.redinfo.daq.app.DaqApplication"
         android:allowBackup="true"
-        android:icon="@drawable/launcher_app"
+        android:icon="@drawable/shipping"
         android:label="@string/app_name"
         android:theme="@style/Theme.D1" >
         <activity
@@ -75,7 +75,14 @@
             android:name=".barcode.PreferencesActivity"
             android:screenOrientation="portrait" >
         </activity>
-        <activity android:name=".app.SubmmitCode" >
+        <activity
+            android:name=".app.SubmmitCode"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="com.redinfo.daq.submmit.RECVR" />
+
+               <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity android:name=".util.ExportXML" >
         </activity>
@@ -85,7 +92,14 @@
         </activity>
         <activity android:name=".app.FunctionList" >
         </activity>
-        <activity android:name=".app.CoderListActivity" >
+        <activity
+            android:name=".app.CoderListActivity"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <action android:name="com.redinfo.daq.codelist.RECVR" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <activity android:name=".app.StatisticsActivity" >
         </activity>

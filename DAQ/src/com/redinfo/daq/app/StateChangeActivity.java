@@ -92,6 +92,7 @@ public class StateChangeActivity extends Activity implements OnClickListener {
 		confirm_tv = (TextView) findViewById(R.id.judge_tv);
 		confirm_et = (EditText) findViewById(R.id.judge_et);
 		confirm_et.setInputType(InputType.TYPE_DATETIME_VARIATION_NORMAL);
+		// confirm_et.setInputType(InputType.TYPE_CLASS_NUMBER);
 		ll1 = (LinearLayout) findViewById(R.id.ll1);
 		ll2 = (LinearLayout) findViewById(R.id.ll2);
 		ll3 = (LinearLayout) findViewById(R.id.ll3);

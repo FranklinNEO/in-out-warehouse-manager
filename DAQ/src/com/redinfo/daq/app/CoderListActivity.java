@@ -1,6 +1,7 @@
 package com.redinfo.daq.app;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import mexxen.mx5010.barcode.BarcodeEvent;
@@ -33,9 +34,16 @@ import android.widget.Toast;
 import com.redinfo.daq.R;
 import com.redinfo.daq.data.CodeDBHelper;
 import com.redinfo.daq.ui.CustomDialog;
+import com.redinfo.daq.util.SoundPlayer;
+import com.redinfo.daq.util.SoundPlayer.State;
 
 public class CoderListActivity extends Activity implements
 		OnItemLongClickListener, OnClickListener {
+	// This intent string contains the captured data as a string
+	// (in the case of MSR this data string contains a concatenation of the
+	// track data)
+	private static final String DATA_STRING_TAG = "com.motorolasolutions.emdk.datawedge.data_string";
+	private static String ourIntentAction = "com.redinfo.daq.codelist.RECVR";
 	public final static String URL = "/data/data/com.redinfo.daq/databases";
 	public final static String DB_FILE_NAME = "info.db";
 	SQLiteDatabase db = null;
@@ -57,6 +65,7 @@ public class CoderListActivity extends Activity implements
 	private BarcodeManager bm = null;
 	private BarcodeListener bl = null;
 	private String barcode = null;
+	private com.redinfo.daq.util.SoundPlayer sp;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +80,9 @@ public class CoderListActivity extends Activity implements
 		} else {
 
 		}
+		sp = new SoundPlayer();
+		sp.addSound(CoderListActivity.this, R.raw.alert, State.refreshed);
+		sp.addSound(CoderListActivity.this, R.raw.refresh_pulling, State.pull);
 		codeListView = (ListView) findViewById(R.id.codelv);
 		codeListView.setOnItemLongClickListener(this);
 		search_et = (EditText) findViewById(R.id.search_bar_et);
@@ -142,6 +154,7 @@ public class CoderListActivity extends Activity implements
 								codeListView.setAdapter(adapter);
 
 							} else {
+								sp.play(State.refreshed);
 								Toast.makeText(CoderListActivity.this,
 										getString(R.string.code_not_exsit),
 										Toast.LENGTH_SHORT).show();
@@ -156,6 +169,59 @@ public class CoderListActivity extends Activity implements
 			}
 		};
 		bm.addListener(bl);
+	}
+
+	// We need to handle any incoming intents, so let override the onNewIntent
+	// method
+	@Override
+	public void onNewIntent(Intent i) {
+		// i.addCategory("com.redinfo.daq.app.code");
+		// i.addCategory("android.intent.category.DEFAULT");
+		handleDecodeData(i);
+	}
+
+	private void handleDecodeData(Intent i) {
+		if (i.getAction().contentEquals(ourIntentAction)) {
+			String data = i.getStringExtra(DATA_STRING_TAG);
+			// 调用getBarcode()方法读取条码信息
+			barcode = data;
+
+			new AsyncTask<Integer, Integer, String[]>() {
+
+				protected void onPreExecute() {
+					loadingdialog.show();
+					super.onPreExecute();
+				}
+
+				@Override
+				protected void onCancelled() {
+					super.onCancelled();
+				}
+
+				protected String[] doInBackground(Integer... params) {
+					resetList(barcode);
+					return null;
+				}
+
+				protected void onPostExecute(String[] result) {
+					// init();
+					if (exsit) {
+						adapter = new MyAdapter(CoderListActivity.this);
+						codeListView.setAdapter(adapter);
+
+					} else {
+						sp.play(State.refreshed);
+						Toast.makeText(CoderListActivity.this,
+								getString(R.string.code_not_exsit),
+								Toast.LENGTH_SHORT).show();
+					}
+					search_et.setText(barcode);
+					loadingdialog.dismiss();
+					super.onPostExecute(result);
+				}
+			}.execute(0);
+
+		}
 	}
 
 	// protected void init() {
@@ -268,7 +334,7 @@ public class CoderListActivity extends Activity implements
 			if (position < 9) {
 				holder.codeNum.setText("0" + pos);
 			} else {
-				holder.codeNum.setText(pos+"");
+				holder.codeNum.setText(pos + "");
 			}
 			holder.codeText.setText(code_arr.get(position));
 			return convertView;
@@ -287,7 +353,7 @@ public class CoderListActivity extends Activity implements
 		customBuilder
 				.setTitle("提示")
 				.setMessage(
-						getString(R.string.delete_message)+"\n"
+						getString(R.string.delete_message) + "\n"
 								+ code_arr.get(position))
 				.setNegativeButton(getString(R.string.cancel),
 						new DialogInterface.OnClickListener() {

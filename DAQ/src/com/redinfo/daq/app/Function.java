@@ -67,7 +67,7 @@ public class Function extends Activity implements OnItemClickListener,
 	private Button funcBtn = null;
 	// private static final int FUNCTION_INTENT_REQ_CODE = 0x967;
 	private static final int MENU_LOGOUT = Menu.FIRST;
-	private Integer[] mThumbIds = { R.drawable.shipping, R.drawable.order,
+	private Integer[] mThumbIds = { R.drawable.transfer, R.drawable.order,
 			R.drawable.maintenance, R.drawable.system_info };
 	private String Func;
 	// private String[] GridItem = {
@@ -100,6 +100,7 @@ public class Function extends Activity implements OnItemClickListener,
 	private static boolean hascustomer = false;
 	private int flag = 100;
 	private SharedPreferences sharedpreferences;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -180,8 +181,10 @@ public class Function extends Activity implements OnItemClickListener,
 						funcBtn.setBackgroundResource(R.drawable.start_button);
 					} else {
 						funcBtn.setEnabled(false);
-						funcBtn.setTextColor(Color.parseColor("#60000000"));
-						funcBtn.setBackgroundResource(R.drawable.login_button);
+						// funcBtn.setTextColor(Color.parseColor("#60000000"));
+						// funcBtn.setBackgroundResource(R.drawable.login_button);
+						funcBtn.setTextColor(Color.parseColor("#ffffffff"));
+						funcBtn.setBackgroundResource(R.drawable.start_button);
 					}
 
 				} else {
@@ -197,8 +200,10 @@ public class Function extends Activity implements OnItemClickListener,
 						funcBtn.setBackgroundResource(R.drawable.start_button);
 					} else {
 						funcBtn.setEnabled(false);
-						funcBtn.setTextColor(Color.parseColor("#60000000"));
-						funcBtn.setBackgroundResource(R.drawable.login_button);
+						// funcBtn.setTextColor(Color.parseColor("#60000000"));
+						// funcBtn.setBackgroundResource(R.drawable.login_button);
+						funcBtn.setTextColor(Color.parseColor("#ffffffff"));
+						funcBtn.setBackgroundResource(R.drawable.start_button);
 					}
 				}
 				loadingdialog.dismiss();
@@ -845,8 +850,10 @@ public class Function extends Activity implements OnItemClickListener,
 					getString(R.string.please_select_ware_house_type),
 					Toast.LENGTH_SHORT).show();
 			funcBtn.setEnabled(false);
-			funcBtn.setTextColor(Color.parseColor("#60000000"));
-			funcBtn.setBackgroundResource(R.drawable.login_button);
+			// funcBtn.setTextColor(Color.parseColor("#60000000"));
+			// funcBtn.setBackgroundResource(R.drawable.login_button);
+			funcBtn.setTextColor(Color.parseColor("#ffffffff"));
+			funcBtn.setBackgroundResource(R.drawable.start_button);
 		} else {
 			funcBtn.setText(getString(FuncTxt[flag]));
 			funcBtn.setEnabled(true);

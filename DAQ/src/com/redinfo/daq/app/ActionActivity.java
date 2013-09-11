@@ -287,7 +287,7 @@ public class ActionActivity extends Activity implements OnClickListener {
 		// MenuItemCompat.SHOW_AS_ACTION_ALWAYS);
 		// MenuItemCompat.setShowAsAction(logout,
 		// MenuItemCompat.SHOW_AS_ACTION_WITH_TEXT);
-		// F menu.add(0, MENU_LOGOUT, 0, getString(R.string.logout_account));
+		// menu.add(0, MENU_LOGOUT, 0, getString(R.string.logout_account));
 		menu.add(0, MENU_ORDERLIST, 0, getString(R.string.order_list));
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -356,7 +356,6 @@ public class ActionActivity extends Activity implements OnClickListener {
 				abbr = intent.getStringExtra("data_abbr");
 				code = intent.getStringExtra("data_code");
 				select.setText(name);
-
 			} else if (resultCode == RESULT_CANCELED) {
 				Toast.makeText(this, getString(R.string.select_no_customer),
 						Toast.LENGTH_SHORT).show();

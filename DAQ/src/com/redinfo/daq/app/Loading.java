@@ -55,6 +55,7 @@ public class Loading extends Activity implements
 	private SideBar sideBar;
 	private TextView letterTv;
 	private boolean isList = false;
+	private boolean hasInfo = false;
 	private String Names = "";
 	private String Abbrs = "";
 	private String Codes = "";
@@ -119,10 +120,38 @@ public class Loading extends Activity implements
 				EditText edit = (EditText) findViewById(R.id.editText1);
 				Search = edit.getText().toString().trim();
 				if (Search == null || Search.equals("")) {
-					Toast.makeText(
-							Loading.this,
-							getString(R.string.please_enter_customer_name_or_abrr),
-							Toast.LENGTH_SHORT).show();
+					// Toast.makeText(
+					// Loading.this,
+					// getString(R.string.please_enter_customer_name_or_abrr),
+					// Toast.LENGTH_SHORT).show();
+
+					// TODO Auto-generated method stub
+					String sql = "SELECT * FROM customer_data" + ";";
+					Cursor cur = db.rawQuery(sql, null);
+					data = new ArrayList<HashMap<String, String>>();
+					if (cur != null && cur.moveToFirst()) {
+						hasInfo = true;
+						do {
+							HashMap<String, String> map = new HashMap<String, String>();
+							map.put("name", cur.getString(cur
+									.getColumnIndex("customerName")));
+							map.put("abbr", cur.getString(cur
+									.getColumnIndex("customerInitial")));
+							map.put("code", cur.getString(cur
+									.getColumnIndex("customerID")));
+							data.add(map);
+						} while ((cur.moveToNext()));
+					} else {
+						hasInfo = false;
+						// Toast.makeText(getApplicationContext(),
+						// getString(R.string.find_no_customer),
+						// Toast.LENGTH_SHORT)
+						// .show();
+
+					}
+					ListView list = (ListView) findViewById(R.id.listView1);
+					adapter = new MyAdapter(Loading.this);
+					list.setAdapter(adapter);
 				} else {
 					new AsyncTask<Integer, Integer, String[]>() {
 
@@ -146,6 +175,11 @@ public class Loading extends Activity implements
 							ListView list = (ListView) findViewById(R.id.listView1);
 							adapter = new MyAdapter(Loading.this);
 							list.setAdapter(adapter);
+							if (!hasInfo) {
+								Toast.makeText(Loading.this,
+										getString(R.string.find_no_customer),
+										Toast.LENGTH_SHORT).show();
+							}
 							super.onPostExecute(result);
 						}
 					}.execute(0);
@@ -205,6 +239,7 @@ public class Loading extends Activity implements
 		Cursor cur = db.rawQuery(sql, null);
 		data = new ArrayList<HashMap<String, String>>();
 		if (cur != null && cur.moveToFirst()) {
+			hasInfo = true;
 			do {
 				HashMap<String, String> map = new HashMap<String, String>();
 				map.put("name",
@@ -215,9 +250,11 @@ public class Loading extends Activity implements
 				data.add(map);
 			} while ((cur.moveToNext()));
 		} else {
-			Toast.makeText(getApplicationContext(),
-					getString(R.string.find_no_customer), Toast.LENGTH_SHORT)
-					.show();
+			hasInfo = false;
+			// Toast.makeText(getApplicationContext(),
+			// getString(R.string.find_no_customer), Toast.LENGTH_SHORT)
+			// .show();
+
 		}
 
 	}

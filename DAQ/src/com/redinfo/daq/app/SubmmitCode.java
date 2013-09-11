@@ -15,6 +15,7 @@ import mexxen.mx5010.barcode.BarcodeManager;
 
 import com.redinfo.daq.R;
 import com.redinfo.daq.barcode.CaptureActivity;
+import com.redinfo.daq.barcode.Contents.Type;
 import com.redinfo.daq.data.CodeDBHelper;
 import com.redinfo.daq.ui.CustomDialog;
 import com.redinfo.daq.util.SoundPlayer;
@@ -34,20 +35,26 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class SubmmitCode extends Activity implements OnClickListener {
+
+	// This intent string contains the captured data as a string
+	// (in the case of MSR this data string contains a concatenation of the
+	// track data)
+	private static final String DATA_STRING_TAG = "com.motorolasolutions.emdk.datawedge.data_string";
+	private static String ourIntentAction = "com.redinfo.daq.submmit.RECVR";
 	public final static String URL = "/data/data/com.redinfo.daq/databases";
 	private static final String BARCODE_SCANER_INTENT = "com.redinfo.daq.barcode.SCAN";
 	public final static String DB_FILE_NAME = "info.db";
@@ -56,7 +63,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 
 	private static final int BARCODE_INTENT_REQ_CODE = 0x965;
 
-	private static final int MENU_LOGOUT = Menu.FIRST;
+	// private static final int MENU_LOGOUT = Menu.FIRST;
 	private com.redinfo.daq.util.SoundPlayer sp;
 	private String name;
 	// private String abbr;
@@ -76,8 +83,10 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	private Button Scanner = null;
 	private Button Statistics = null;
 	private Button CodeBtn = null;
+	private Button CodeAddBtn = null;
 	private TextView orderText = null;
 	private TextView customerText = null;
+	private EditText codeEdit = null;
 	private String createTime = null;
 	private int order_id;
 	private int flag = 100;
@@ -90,6 +99,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.submmit);
+		// ourIntentAction = getString(R.string.intentAction);
 		MyApplication.getInstance().addActivity(this);
 		sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		FileInputStream inStream = null;
@@ -128,7 +138,12 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		BarcodeList = new ArrayList<codeList>();
 		sp = new SoundPlayer();
 		sp.addSound(SubmmitCode.this, R.raw.alert, State.refreshed);
-		sp.addSound(SubmmitCode.this, R.raw.refresh_pulling, State.pull);
+		sp.addSound(SubmmitCode.this, R.raw.beep, State.pull);
+		codeEdit = (EditText) findViewById(R.id.code_add_et);
+		// codeEdit.setInputType(InputType.TYPE_CLASS_NUMBER);
+		codeEdit.setInputType(InputType.TYPE_DATETIME_VARIATION_NORMAL);
+		CodeAddBtn = (Button) findViewById(R.id.code_add_btn);
+		CodeAddBtn.setOnClickListener(this);
 		Submmit = (Button) findViewById(R.id.submmit);
 		// if(continueOrder==1){
 		// }
@@ -151,9 +166,9 @@ public class SubmmitCode extends Activity implements OnClickListener {
 		orderText.setText(OrderID);
 		customerText.setText(name);
 		UpdateCodeList();
+
 		// 扫描器监听
 		bm = new BarcodeManager(this);
-
 		bl = new BarcodeListener() {
 			// 重写barcodeEvent 方法，获取条码事件
 			@Override
@@ -162,6 +177,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 				if (event.getOrder().equals("SCANNER_READ")) {
 					// 调用getBarcode()方法读取条码信息
 					String barcode = bm.getBarcode();
+					codeEdit.setText(barcode);
 					if (barcode.length() != 20) {
 						sp.play(State.refreshed);
 						Toast.makeText(SubmmitCode.this,
@@ -201,13 +217,73 @@ public class SubmmitCode extends Activity implements OnClickListener {
 						default:
 							break;
 						}
-
 					}
 
 				}
 			}
 		};
 		bm.addListener(bl);
+
+	}
+
+	// We need to handle any incoming intents, so let override the onNewIntent
+	// method
+	@Override
+	public void onNewIntent(Intent i) {
+		// i.addCategory("com.redinfo.daq.sub");
+		// i.addCategory("android.intent.category.DEFAULT");
+		setIntent(i);
+		handleDecodeData(i);
+	}
+
+	private void handleDecodeData(Intent i) {
+		if (i.getAction().contentEquals(ourIntentAction)) {
+			String data = i.getStringExtra(DATA_STRING_TAG);
+			// 调用getBarcode()方法读取条码信息
+			String barcode = data;
+			codeEdit.setText(barcode);
+			if (barcode.length() != 20) {
+				sp.play(State.refreshed);
+				Toast.makeText(SubmmitCode.this,
+						getString(R.string.not_bcm_code), Toast.LENGTH_SHORT)
+						.show();
+			} else {
+				switch (Check(barcode)) {
+				case 0:
+					BarcodeResult.add(barcode);
+					SimpleDateFormat df = new SimpleDateFormat(
+							"yyyy-MM-dd HH:mm:ss");
+					String CodeDate = df.format(new java.util.Date());
+					BarcodeDate.add(CodeDate);
+					adapter = new CustomAdapter(SubmmitCode.this);
+					Code_List.setAdapter(adapter);
+					// 插入条码表
+					m_db.insert_code(CodeDBHelper.ORDER_CODE_TABLE_NAME,
+							barcode, barcode.substring(0, 2),
+							barcode.substring(2, 7),
+							((DaqApplication) getApplication()).getActorId(),
+							CodeDate, getproductID(barcode), getorderID());
+					UpdateCodeList();
+					break;
+				case 1:
+					sp.play(State.refreshed);
+					Toast.makeText(SubmmitCode.this,
+							getString(R.string.this_barcode_is_exist),
+							Toast.LENGTH_SHORT).show();
+					break;
+				case 2:
+					sp.play(State.refreshed);
+					Toast.makeText(SubmmitCode.this,
+							getString(R.string.on_data_in_database),
+							Toast.LENGTH_SHORT).show();
+					break;
+				default:
+					break;
+				}
+
+			}
+
+		}
 	}
 
 	protected int getorderID() {
@@ -384,6 +460,52 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
+		case R.id.code_add_btn:
+
+			// 调用getBarcode()方法读取条码信息
+			String barcode = codeEdit.getText().toString().trim();
+			if (barcode.length() != 20) {
+				sp.play(State.refreshed);
+				Toast.makeText(SubmmitCode.this,
+						getString(R.string.not_bcm_code), Toast.LENGTH_SHORT)
+						.show();
+			} else {
+				switch (Check(barcode)) {
+				case 0:
+					sp.play(State.pull);
+					BarcodeResult.add(barcode);
+					SimpleDateFormat df = new SimpleDateFormat(
+							"yyyy-MM-dd HH:mm:ss");
+					String CodeDate = df.format(new java.util.Date());
+					BarcodeDate.add(CodeDate);
+					adapter = new CustomAdapter(SubmmitCode.this);
+					Code_List.setAdapter(adapter);
+					// 插入条码表
+					m_db.insert_code(CodeDBHelper.ORDER_CODE_TABLE_NAME,
+							barcode, barcode.substring(0, 2),
+							barcode.substring(2, 7),
+							((DaqApplication) getApplication()).getActorId(),
+							CodeDate, getproductID(barcode), getorderID());
+					UpdateCodeList();
+					break;
+				case 1:
+					sp.play(State.refreshed);
+					Toast.makeText(SubmmitCode.this,
+							getString(R.string.this_barcode_is_exist),
+							Toast.LENGTH_SHORT).show();
+					break;
+				case 2:
+					Toast.makeText(SubmmitCode.this,
+							getString(R.string.on_data_in_database),
+							Toast.LENGTH_SHORT).show();
+					break;
+				default:
+					break;
+				}
+
+			}
+
+			break;
 		case R.id.submmit:
 			this.submmitOrder();
 			break;
@@ -410,6 +532,7 @@ public class SubmmitCode extends Activity implements OnClickListener {
 				codeIntent.setClass(SubmmitCode.this, CoderListActivity.class);
 				bm.removeListener(bl);
 				bm.dismiss();
+				// codeIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 				startActivity(codeIntent);
 				this.finish();
 			} else {
@@ -608,11 +731,11 @@ public class SubmmitCode extends Activity implements OnClickListener {
 	// }
 	// }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add(0, MENU_LOGOUT, 0, getString(R.string.logout_message));
-		return super.onCreateOptionsMenu(menu);
-	}
+	// @Override
+	// public boolean onCreateOptionsMenu(Menu menu) {
+	// menu.add(0, MENU_LOGOUT, 0, getString(R.string.logout_message));
+	// return super.onCreateOptionsMenu(menu);
+	// }
 
 	@Override
 	public void onBackPressed() {
@@ -664,59 +787,59 @@ public class SubmmitCode extends Activity implements OnClickListener {
 
 	}
 
-	// 菜单
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case MENU_LOGOUT:
-			Dialog dialog = null;
-			CustomDialog.Builder customBuilder = new CustomDialog.Builder(
-					SubmmitCode.this);
-			customBuilder
-					.setTitle(getString(R.string.attention))
-					.setMessage(getString(R.string.confirm_to_logout))
-					.setNegativeButton(getString(R.string.cancel),
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int which) {
-									dialog.dismiss();
-								}
-							})
-					.setPositiveButton(getString(R.string.logout_button),
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int which) {
-									try {
-										FileOutputStream outStream = SubmmitCode.this
-												.openFileOutput("userInfo.txt",
-														Context.MODE_PRIVATE);
-										String content = "" + "," + "" + ","
-												+ "";
-										outStream.write(content.getBytes());
-										outStream.close();
-									} catch (IOException ex) {
-
-									}
-									Intent intent = new Intent(
-											getApplication(),
-											LoginActivity.class);
-									intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-									startActivity(intent);
-									bm.removeListener(bl);
-									bm.dismiss();
-
-									SubmmitCode.this.finish();
-									db.close();
-									dialog.dismiss();
-								}
-							});
-			dialog = customBuilder.create();
-			dialog.show();
-			return true;
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
+	// // 菜单
+	// @Override
+	// public boolean onOptionsItemSelected(MenuItem item) {
+	// switch (item.getItemId()) {
+	// case MENU_LOGOUT:
+	// Dialog dialog = null;
+	// CustomDialog.Builder customBuilder = new CustomDialog.Builder(
+	// SubmmitCode.this);
+	// customBuilder
+	// .setTitle(getString(R.string.attention))
+	// .setMessage(getString(R.string.confirm_to_logout))
+	// .setNegativeButton(getString(R.string.cancel),
+	// new DialogInterface.OnClickListener() {
+	// public void onClick(DialogInterface dialog,
+	// int which) {
+	// dialog.dismiss();
+	// }
+	// })
+	// .setPositiveButton(getString(R.string.logout_button),
+	// new DialogInterface.OnClickListener() {
+	// public void onClick(DialogInterface dialog,
+	// int which) {
+	// try {
+	// FileOutputStream outStream = SubmmitCode.this
+	// .openFileOutput("userInfo.txt",
+	// Context.MODE_PRIVATE);
+	// String content = "" + "," + "" + ","
+	// + "";
+	// outStream.write(content.getBytes());
+	// outStream.close();
+	// } catch (IOException ex) {
+	//
+	// }
+	// Intent intent = new Intent(
+	// getApplication(),
+	// LoginActivity.class);
+	// intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	// startActivity(intent);
+	// bm.removeListener(bl);
+	// bm.dismiss();
+	//
+	// SubmmitCode.this.finish();
+	// db.close();
+	// dialog.dismiss();
+	// }
+	// });
+	// dialog = customBuilder.create();
+	// dialog.show();
+	// return true;
+	// default:
+	// return super.onOptionsItemSelected(item);
+	// }
+	// }
 
 	private void openScanner() {
 		Intent intent = new Intent(BARCODE_SCANER_INTENT);
